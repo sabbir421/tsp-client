@@ -1,0 +1,281 @@
+.visitGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.filterBtn {
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--text-muted);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.filterBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filterBtnActive {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+.visitCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.visitCard:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.visitCardDone {
+  opacity: 0.92;
+  border-color: #bbf7d0;
+}
+
+.visitCardInner {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 0;
+}
+
+.propertySection {
+  padding: 24px;
+  border-right: 1px solid var(--border);
+}
+
+.buyerSection {
+  padding: 24px;
+  background: linear-gradient(180deg, #fafbfc 0%, #f8fafc 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.propertyTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.propertyMeta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.propertyPrice {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 14px;
+}
+
+.propertyContact {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--border-light);
+  color: var(--text-muted);
+}
+
+.tagAccepted {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.tagCompleted {
+  background: var(--success-light);
+  color: #15803d;
+}
+
+.tagMatch {
+  background: var(--info-light);
+  color: #1d4ed8;
+}
+
+.addressRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 12px 14px;
+  background: var(--border-light);
+  border-radius: var(--radius-sm);
+  line-height: 1.45;
+}
+
+.addressIcon {
+  flex-shrink: 0;
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+.buyerName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.contactIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: white;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--primary);
+  font-size: 0.85rem;
+}
+
+.contactLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.contactValue {
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.verifyRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.verifyBadge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.verifyYes {
+  background: var(--success-light);
+  color: #15803d;
+}
+
+.verifyNo {
+  background: #f3f4f6;
+  color: var(--text-muted);
+}
+
+.actionRow {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.doneBtn {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+}
+
+.doneBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.doneBtn:disabled {
+  cursor: not-allowed;
+}
+
+.doneBtnCompleted {
+  background: var(--success-light);
+  color: #15803d;
+  border: 1.5px solid #bbf7d0;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .visitCardInner {
+    grid-template-columns: 1fr;
+  }
+
+  .propertySection {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+@media (max-width: 640px) {
+  .propertySection,
+  .buyerSection {
+    padding: 18px;
+  }
+}

@@ -1,0 +1,217 @@
+.logoAccent {
+  color: var(--primary);
+}
+
+.navItemActivePill {
+  background: white !important;
+  color: var(--sidebar-bg) !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.navItemActivePill:hover {
+  background: white !important;
+  color: var(--sidebar-bg) !important;
+}
+
+.expertHelp {
+  margin: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.expertHelpContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.expertHelpText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.expertHelpText strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.3;
+}
+
+.expertHelpText span {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.4;
+}
+
+.expertHelpBtn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.expertHelpBtn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.expertAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.expertAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Buyer top header ── */
+.buyerTopHeader {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 clamp(16px, 3vw, 32px);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.buyerHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.buyerHeaderTitle {
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.buyerHeaderSubtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.buyerHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.iconBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: 1px solid transparent;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.userProfile:hover {
+  background: var(--primary-light);
+  border-color: var(--border);
+}
+
+.userProfileText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.userGreeting {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.userRole {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .buyerTopHeader {
+    gap: 10px;
+  }
+
+  .buyerHeaderSubtitle {
+    display: none;
+  }
+
+  .userProfileText {
+    display: none;
+  }
+
+  .iconBtnDesktop,
+  .chevronDesktop {
+    display: none;
+  }
+
+  .expertHelp {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .buyerHeaderRight {
+    gap: 6px;
+  }
+
+  .iconBtn {
+    width: 36px;
+    height: 36px;
+  }
+}

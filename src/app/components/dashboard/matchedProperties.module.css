@@ -1,0 +1,811 @@
+.pageHeader {
+  margin-bottom: 28px;
+}
+
+.pageTitle {
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.loading,
+.emptyState {
+  text-align: center;
+  padding: 72px 32px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+
+.emptyTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.error {
+  background: var(--error-light);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: #b91c1c;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+}
+
+.propertyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.propertyCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.propertyCard:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-3px);
+}
+
+.imageWrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 200px;
+  padding: 0;
+  border: none;
+  background: var(--border-light);
+  overflow: hidden;
+  text-align: left;
+}
+
+.imageOpenBtn {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.imageOpenBtn:hover .image,
+.propertyCard:hover .imageOpenBtn .image {
+  transform: scale(1.04);
+}
+
+.imageViewOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.42);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.imageOpenBtn:hover .imageViewOverlay,
+.imageOpenBtn:focus-visible .imageViewOverlay {
+  opacity: 1;
+}
+
+.imageViewLabel {
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--navy);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.videoBadge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.95);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.cardNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  color: white;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.imageWrap:hover .cardNav,
+.imageWrap:focus-within .cardNav {
+  opacity: 1;
+}
+
+.cardNav:hover {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.cardNavPrev {
+  left: 10px;
+}
+
+.cardNavNext {
+  right: 10px;
+}
+
+.cardDots {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+  transform: translateX(-50%);
+}
+
+.cardDot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.cardDotActive {
+  width: 16px;
+  background: white;
+}
+
+.photoCount {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 4;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 33, 71, 0.82);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, var(--primary-light), #e0e7ff);
+}
+
+.statusBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.statusVerified {
+  background: rgba(240, 253, 244, 0.95);
+  color: #15803d;
+}
+
+.statusPending {
+  background: rgba(255, 247, 237, 0.95);
+  color: #c2410c;
+}
+
+.statusAccepted {
+  background: rgba(240, 253, 244, 0.95);
+  color: #15803d;
+}
+
+.matchBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(0, 33, 71, 0.85);
+  color: white;
+}
+
+.cardBody {
+  padding: 18px 20px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.negotiableTag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.details {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.locationLine {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.fullDetails {
+  margin: 4px 0 14px;
+  padding: 12px;
+  background: var(--border-light);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.fullDetailsTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.specList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.specRow {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.specRow dt {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.specRow dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.amenityBlock {
+  margin-top: 12px;
+}
+
+.amenityLabel {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.amenityChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.amenityChip {
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.photoStrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 12px;
+  padding-bottom: 2px;
+}
+
+.thumbBtn {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.thumbView {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.thumbVideoIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  font-size: 0.6rem;
+  pointer-events: none;
+}
+
+.thumbBtn:hover .thumb {
+  transform: scale(1.06);
+}
+
+.thumbBtn:hover .thumbView {
+  opacity: 1;
+}
+
+.thumbBtn:hover .thumbVideoIcon {
+  opacity: 0;
+}
+
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2, 8, 23, 0.78);
+  backdrop-filter: blur(6px);
+}
+
+.lightbox {
+  position: relative;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: #0b1220;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  overflow: auto;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.lightboxClose:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.lightboxTitle {
+  margin: 0 48px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.lightboxStage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.lightboxImage,
+.lightboxVideo {
+  max-width: 100%;
+  max-height: min(68vh, 620px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #000;
+}
+
+.lightboxVideo {
+  width: min(100%, 860px);
+}
+
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.lightboxNav:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.lightboxNavPrev {
+  left: 12px;
+}
+
+.lightboxNavNext {
+  right: 12px;
+}
+
+.lightboxCounter {
+  margin: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lightboxDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lightboxDot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+}
+
+.lightboxDotActive {
+  background: var(--primary);
+  width: 18px;
+}
+
+.lightboxThumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.lightboxThumbBtn {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 54px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition), border-color var(--transition);
+}
+
+.lightboxThumbBtn:hover {
+  opacity: 1;
+}
+
+.lightboxThumbActive {
+  opacity: 1;
+  border-color: var(--primary);
+}
+
+.lightboxThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lightboxThumbBtn .thumbVideoIcon {
+  width: 20px;
+  height: 20px;
+  font-size: 0.55rem;
+}
+
+.contactHint {
+  margin-top: 12px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.reqLink {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  background: var(--border-light);
+  border-radius: var(--radius-sm);
+}
+
+.sellerNote {
+  font-size: 0.82rem;
+  color: var(--text);
+  font-style: italic;
+  background: var(--primary-light);
+  border-left: 3px solid var(--primary);
+  padding: 10px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+
+.matchScore {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.matchBar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.matchBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.matchLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.actionsRow {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.detailsBtn {
+  flex: 1;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  background: white;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.detailsBtn:hover {
+  background: var(--border-light);
+  border-color: var(--text-muted);
+}
+
+.acceptBtn {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+}
+
+.acceptBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.acceptBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.acceptBtnAccepted {
+  background: var(--success-light);
+  color: #15803d;
+  box-shadow: none;
+  border: 1.5px solid #bbf7d0;
+}
+
+@media (max-width: 768px) {
+  .propertyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageWrap {
+    height: 180px;
+  }
+
+  .cardNav {
+    opacity: 1;
+    width: 30px;
+    height: 30px;
+  }
+
+  .lightbox {
+    padding: 16px;
+  }
+
+  .lightboxImage,
+  .lightboxVideo {
+    max-height: min(58vh, 480px);
+  }
+
+  .lightboxNav {
+    width: 38px;
+    height: 38px;
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actionsRow {
+    flex-direction: column;
+  }
+
+  .lightboxNavPrev {
+    left: 6px;
+  }
+
+  .lightboxNavNext {
+    right: 6px;
+  }
+}

@@ -1,0 +1,623 @@
+/* ── Buyer dashboard ── */
+.topRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.profileCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 22px 24px;
+  transition: box-shadow var(--transition);
+}
+
+.profileCard:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+.profileCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.profileCardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.editLink {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.editLink:hover {
+  text-decoration: underline;
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 24px;
+}
+
+.profileField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.profileLabel {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.profileValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.progressCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: box-shadow var(--transition);
+}
+
+.progressCard:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+.progressRing {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 16px;
+}
+
+.progressRing svg {
+  transform: rotate(-90deg);
+}
+
+.progressRingBg {
+  fill: none;
+  stroke: #f3f4f6;
+  stroke-width: 10;
+}
+
+.progressRingFill {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.progressPercent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.progressText {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+  max-width: 260px;
+}
+
+.refineBtn {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.refineBtn:hover {
+  background: var(--primary-dark);
+  color: white;
+  text-decoration: none;
+}
+
+/* ── Stats with badges ── */
+.buyerStatsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.buyerStatCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.buyerStatCard:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.buyerStatLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.buyerStatValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.statBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.statBadgeGreen {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.statBadgeBlue {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.statBadgeOrange {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* ── Matched properties grid ── */
+.propertiesSection {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.propertiesSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.propertiesSectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.propertiesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+
+.propertyCard {
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.propertyCard:last-child {
+  border-right: none;
+}
+
+.propertyImageWrap {
+  position: relative;
+  height: 140px;
+  overflow: hidden;
+}
+
+.propertyImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.propertyImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.propertyStatusBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.propertyStatusVerified {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.propertyStatusPending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.propertyCardBody {
+  padding: 14px 16px 16px;
+}
+
+.propertyPrice {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.propertyTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.propertyDetails {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.matchScore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.matchBar {
+  flex: 1;
+  height: 5px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.matchBarFill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 3px;
+}
+
+.matchLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--success);
+  white-space: nowrap;
+}
+
+/* ── Bottom two-column ── */
+.bottomTwoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.visitListItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.visitListItem:last-child {
+  border-bottom: none;
+}
+
+.visitDateBlock {
+  width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.visitDay {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.visitMonth {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.visitInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.visitProperty {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.visitTime {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.visitStatusConfirmed {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.visitStatusScheduled {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.visitStatusRequested {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.contactListItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.contactListItem:last-child {
+  border-bottom: none;
+}
+
+.contactIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contactInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.contactAgency {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.contactDate {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.contactStatusReleased {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.contactStatusPending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* ── Footer feature bar ── */
+.featureBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding: 18px 24px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.featureItem svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.emptyMessage {
+  grid-column: 1 / -1;
+  padding: 28px 22px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.widgetEmpty {
+  padding: 20px 22px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.reqListItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.reqListItem:last-child {
+  border-bottom: none;
+}
+
+.reqInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.reqTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.35;
+}
+
+.reqMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.reqStatusActive {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.reqStatusMatched {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.reqStatusClosed {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .topRow {
+    grid-template-columns: 1fr;
+  }
+
+  .propertiesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .propertyCard {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .buyerStatsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bottomTwoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .propertiesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .buyerStatsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .featureBar {
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .reqListItem {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .buyerStatValue {
+    font-size: 1.35rem;
+  }
+
+  .progressRing {
+    width: 100px;
+    height: 100px;
+  }
+
+  .progressRing svg {
+    width: 100px;
+    height: 100px;
+  }
+}
