@@ -144,7 +144,7 @@ export default function LoginPage() {
           <div className={styles.divider}>OR</div>
 
           <button type="button" className={styles.secondaryBtn} onClick={() => setOtpMode(true)}>
-            🛡️ Login with OTP
+            Login with phone OTP
           </button>
         </form>
       ) : (
@@ -163,6 +163,10 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
+          {otpSent && (
+            <p className={styles.otpHint}>We&apos;ve sent a 6-digit code to your registered phone.</p>
+          )}
 
           <div className={styles.otpRow}>
             <div className={styles.inputGroup}>

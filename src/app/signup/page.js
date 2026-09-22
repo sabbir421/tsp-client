@@ -52,14 +52,15 @@ export default function SignupPage() {
   };
 
   const handleSendOtp = async () => {
-    if (!form.phone || !form.email || !localRole) {
-      alert('Please fill phone, email and select account type first');
+    if (!form.phone || !localRole) {
+      alert('Please fill phone number and select account type first');
       return;
     }
     setOtpLoading(true);
     try {
       await authApi.sendRegistrationOtp({
         phone: form.phone,
+        countryCode: form.countryCode,
         email: form.email,
         role: localRole,
       });
@@ -193,7 +194,7 @@ export default function SignupPage() {
         </div>
 
         <div className={styles.inputGroup}>
-          <label className={styles.label}>Verify Your Email</label>
+          <label className={styles.label}>Verify Your Phone</label>
           <div className={styles.otpRow}>
             <div className={styles.inputGroup}>
               <input
@@ -216,7 +217,9 @@ export default function SignupPage() {
             </button>
           </div>
           {otpSent && (
-            <p className={styles.otpHint}>We&apos;ve emailed a 6-digit code to {form.email}</p>
+            <p className={styles.otpHint}>
+              We&apos;ve sent a 6-digit code to {form.countryCode} {form.phone}
+            </p>
           )}
         </div>
 

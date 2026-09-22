@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       <p className={styles.subtitle} style={{ marginBottom: 20 }}>
-        Enter your email or phone number and we&apos;ll send you a link to reset your password.
+        Enter your email or phone number. Reset via SMS OTP, or request a reset link.
       </p>
 
       {error && <div className={styles.error}>{error}</div>}
@@ -135,7 +135,7 @@ export default function ForgotPasswordPage() {
           <div className={styles.divider}>OR</div>
 
           <button type="button" className={styles.secondaryBtn} onClick={() => setOtpMode(true)}>
-            Reset via OTP
+            Reset via phone OTP
           </button>
         </form>
       ) : (
