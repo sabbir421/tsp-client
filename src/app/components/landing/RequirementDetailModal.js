@@ -41,8 +41,7 @@ export default function RequirementDetailModal({ requirement, onClose }) {
           {[requirement.sector, requirement.area, requirement.city].filter(Boolean).join(', ')}
         </p>
         <p className={styles.modalPrice}>
-          {requirement.budget}
-          {requirement.budgetNote && <span style={{ fontSize: '0.85rem', fontWeight: 500 }}> {requirement.budgetNote}</span>}
+          {requirement.budget || requirement.budgetDisplay}
         </p>
 
         <div className={styles.modalSection}>
@@ -54,8 +53,12 @@ export default function RequirementDetailModal({ requirement, onClose }) {
               <div className={styles.specItem}><span className={styles.specLabel}>Bedrooms: </span>{requirement.bedrooms}</div>
             )}
             <div className={styles.specItem}><span className={styles.specLabel}>Size: </span>{formatSqFt(requirement.sizeSqFt)}</div>
-            <div className={styles.specItem}><span className={styles.specLabel}>Move-in: </span>{requirement.moveIn}</div>
-            <div className={styles.specItem}><span className={styles.specLabel}>Posted: </span>{requirement.postedAgo}</div>
+            {requirement.createdAt && (
+              <div className={styles.specItem}>
+                <span className={styles.specLabel}>Posted: </span>
+                {new Date(requirement.createdAt).toLocaleDateString('en-US')}
+              </div>
+            )}
           </div>
         </div>
 

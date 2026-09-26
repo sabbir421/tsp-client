@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { USER_ROLES } from './constants';
-import { PUBLIC_PROPERTIES, PUBLIC_REQUIREMENTS, BACHELOR_LISTINGS } from './data/publicListings';
 import LandingHeader from './components/landing/LandingHeader';
 import LandingFooter from './components/landing/LandingFooter';
 import PropertyCard from './components/landing/PropertyCard';
@@ -21,6 +20,8 @@ import {
 } from './components/landing/LandingIcons';
 import { openPortalWindow } from './utils/navigation';
 import { hasPortalToken } from './utils/authStorage';
+import { propertyApi, requirementApi } from './utils/api';
+import { formatPostedAgo, formatTaka, isBachelorListing } from './utils/format';
 import PublicPageShell from './components/PublicPageShell';
 import styles from './components/landing/landing.module.css';
 
@@ -40,9 +41,31 @@ const TRUST_ITEMS = [
 export default function Home() {
   const router = useRouter();
   const [selectedRequirement, setSelectedRequirement] = useState(null);
+  const [properties, setProperties] = useState([]);
+  const [requirements, setRequirements] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const goBuyer = (path) => openPortalWindow(path, USER_ROLES.BUYER_TENANT);
   const goSeller = (path) => openPortalWindow(path, USER_ROLES.SELLER_AGENT);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [propRes, reqRes] = await Promise.all([
+          propertyApi.getPublic(),
+          requirementApi.getPublic(),
+        ]);
+        setProperties(propRes.data || []);
+        setRequirements(reqRes.data || []);
+      } catch {
+        setProperties([]);
+        setRequirements([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const handleOwnerDetails = (property) => {
     if (hasPortalToken(USER_ROLES.BUYER_TENANT)) {
@@ -52,13 +75,15 @@ export default function Home() {
     }
   };
 
-  const featuredReq = PUBLIC_REQUIREMENTS[0];
+  const featuredReq = requirements[0];
+  const previewProperties = properties.slice(0, 3);
+  const previewRequirements = requirements.slice(0, 3);
+  const bachelorListings = [...properties, ...requirements].filter(isBachelorListing).slice(0, 3);
 
   return (
     <PublicPageShell className={styles.site}>
       <LandingHeader />
 
-      {/* Hero */}
       <section className={styles.hero}>
         <div className={styles.container}>
           <div className={styles.heroGrid}>
@@ -80,44 +105,56 @@ export default function Home() {
               </div>
               <div className={styles.heroStats}>
                 <div className={styles.heroStat}>
-                  <span className={styles.heroStatValue}>0% Commission</span>
-                  <span className={styles.heroStatLabel}>During Uttara pilot</span>
+                  <span className={styles.heroStatValue}>{loading ? '—' : properties.length}</span>
+                  <span className={styles.heroStatLabel}>Listed properties</span>
                 </div>
                 <div className={styles.heroStat}>
-                  <span className={styles.heroStatValue}>48h</span>
-                  <span className={styles.heroStatLabel}>Typical first match</span>
+                  <span className={styles.heroStatValue}>{loading ? '—' : requirements.length}</span>
+                  <span className={styles.heroStatLabel}>Active requirements</span>
                 </div>
                 <div className={styles.heroStat}>
-                  <span className={styles.heroStatValue}>14 sectors</span>
-                  <span className={styles.heroStatLabel}>Uttara covered</span>
+                  <span className={styles.heroStatValue}>0%</span>
+                  <span className={styles.heroStatLabel}>Commission during pilot</span>
                 </div>
               </div>
             </div>
 
             <div className={styles.heroPreview}>
               <p className={styles.previewLabel}>Live Requirement</p>
-              <div className={styles.liveCard}>
-                <div className={styles.liveCardTop}>
-                  <span className={styles.liveBadge}><span className={styles.liveDot} />LIVE</span>
-                  <span className={styles.liveCardMeta}>{featuredReq.postedAgo}</span>
-                </div>
-                <p className={styles.liveCardTitle}>{featuredReq.sector} · {featuredReq.title}</p>
-                <p className={styles.liveCardMeta}>{featuredReq.budget}{featuredReq.budgetNote}</p>
-              </div>
-              <div className={styles.suggestionList}>
-                {PUBLIC_PROPERTIES.slice(0, 3).map((p, i) => (
-                  <div key={p.id} className={styles.suggestionItem}>
-                    <span>{p.title}</span>
-                    <span className={styles.suggestionMatch}>{90 - i * 5}% match</span>
+              {featuredReq ? (
+                <>
+                  <div className={styles.liveCard}>
+                    <div className={styles.liveCardTop}>
+                      <span className={styles.liveBadge}><span className={styles.liveDot} />LIVE</span>
+                      <span className={styles.liveCardMeta}>{formatPostedAgo(featuredReq.createdAt)}</span>
+                    </div>
+                    <p className={styles.liveCardTitle}>
+                      {[featuredReq.sector, featuredReq.title].filter(Boolean).join(' · ')}
+                    </p>
+                    <p className={styles.liveCardMeta}>{featuredReq.budget || featuredReq.budgetDisplay}</p>
                   </div>
-                ))}
-              </div>
+                  {previewProperties.length > 0 && (
+                    <div className={styles.suggestionList}>
+                      {previewProperties.map((p) => (
+                        <div key={p.id} className={styles.suggestionItem}>
+                          <span>{p.title}</span>
+                          <span className={styles.suggestionMatch}>{formatTaka(p.priceDisplay)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={styles.liveCard}>
+                  <p className={styles.liveCardTitle}>No live requirements yet</p>
+                  <p className={styles.liveCardMeta}>New buyer requests will appear here from the database.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
       <section id="how-it-works" className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
@@ -143,32 +180,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Requirements preview */}
       <section className={styles.sectionAlt}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <div>
               <h2 className={styles.sectionTitle}>People looking right now</h2>
-              <p className={styles.sectionSub}>Own or manage a property in Uttara? Answer one of these.</p>
+              <p className={styles.sectionSub}>Own or manage a property? Answer one of these live requirements.</p>
             </div>
             <Link href="/browse/requirements" className={styles.seeAllLink}>
               See all requirements →
             </Link>
           </div>
-          <div className={styles.reqGrid}>
-            {PUBLIC_REQUIREMENTS.slice(0, 3).map((req) => (
-              <RequirementCard
-                key={req.id}
-                requirement={req}
-                onViewDetails={setSelectedRequirement}
-                onSuggest={(r) => goSeller(`/dashboard/buyer-requirements?requirementId=${r.id}`)}
-              />
-            ))}
-          </div>
+          {previewRequirements.length === 0 ? (
+            <div className={styles.emptyState}>No requirements posted yet.</div>
+          ) : (
+            <div className={styles.reqGrid}>
+              {previewRequirements.map((req) => (
+                <RequirementCard
+                  key={req.id}
+                  requirement={req}
+                  onViewDetails={setSelectedRequirement}
+                  onSuggest={(r) => goSeller(`/dashboard/buyer-requirements?requirementId=${r.id}`)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Properties preview */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
@@ -179,20 +218,23 @@ export default function Home() {
               See all properties →
             </Link>
           </div>
-          <div className={styles.propGrid}>
-            {PUBLIC_PROPERTIES.slice(0, 3).map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                onViewDetails={(p) => router.push(`/browse/properties/${p.id}`)}
-                onOwnerDetails={handleOwnerDetails}
-              />
-            ))}
-          </div>
+          {previewProperties.length === 0 ? (
+            <div className={styles.emptyState}>No properties listed yet.</div>
+          ) : (
+            <div className={styles.propGrid}>
+              {previewProperties.map((prop) => (
+                <PropertyCard
+                  key={prop.id}
+                  property={prop}
+                  onViewDetails={(p) => router.push(`/browse/properties/${p.id}`)}
+                  onOwnerDetails={handleOwnerDetails}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Bachelor feed */}
       <section id="bachelor" className={styles.sectionPeach}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
@@ -203,19 +245,22 @@ export default function Home() {
               Open Bachelor Feed
             </button>
           </div>
-          <div className={styles.reqGrid}>
-            {BACHELOR_LISTINGS.map((item) => (
-              <article key={item.id} className={styles.reqCard}>
-                <h3 className={styles.reqTitle}>{item.title}</h3>
-                <p className={styles.reqBudget}>{item.price}</p>
-                <p className={styles.reqMeta}>{item.meta}</p>
-              </article>
-            ))}
-          </div>
+          {bachelorListings.length === 0 ? (
+            <div className={styles.emptyState}>No bachelor listings yet.</div>
+          ) : (
+            <div className={styles.reqGrid}>
+              {bachelorListings.map((item) => (
+                <article key={`${item.title}-${item.id}`} className={styles.reqCard}>
+                  <h3 className={styles.reqTitle}>{item.title}</h3>
+                  <p className={styles.reqBudget}>{item.budget || item.budgetDisplay || formatTaka(item.priceDisplay)}</p>
+                  <p className={styles.reqMeta}>{item.summary || item.meta || [item.sector, item.area, item.city].filter(Boolean).join(', ')}</p>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Trust */}
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.trustGrid}>
@@ -235,7 +280,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className={styles.ctaBar}>
         <div className={styles.container}>
           <h2 className={styles.ctaTitle}>Tell us what you need. Free during the Uttara pilot.</h2>

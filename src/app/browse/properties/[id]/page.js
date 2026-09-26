@@ -1,29 +1,53 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { USER_ROLES } from '../../../constants';
-import { PUBLIC_PROPERTIES } from '../../../data/publicListings';
 import LandingHeader from '../../../components/landing/LandingHeader';
 import LandingFooter from '../../../components/landing/LandingFooter';
 import PropertyGallery from '../../../components/landing/PropertyGallery';
 import { openPortalWindow } from '../../../utils/navigation';
-import { hasPortalToken } from '../../../utils/authStorage';
-import { formatSqFt } from '../../../utils/format';
+import { propertyApi } from '../../../utils/api';
+import { formatPostedAgo, formatSqFt, formatTaka } from '../../../utils/format';
 import PublicPageShell from '../../../components/PublicPageShell';
 import styles from '../../../components/landing/landing.module.css';
 
 export default function PropertyDetailPage() {
   const params = useParams();
-  const property = useMemo(
-    () => PUBLIC_PROPERTIES.find((p) => String(p.id) === String(params.id)),
-    [params.id]
-  );
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const isBuyerAuthenticated = hasPortalToken(USER_ROLES.BUYER_TENANT);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await propertyApi.getPublicOne(params.id);
+        setProperty(res.data || null);
+        setNotFound(!res.data);
+      } catch {
+        setProperty(null);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [params.id]);
 
-  if (!property) {
+  if (loading) {
+    return (
+      <PublicPageShell className={styles.browsePage}>
+        <LandingHeader />
+        <div className={`${styles.container} ${styles.browseContent}`}>
+          <div className={styles.emptyState}>Loading property...</div>
+        </div>
+        <LandingFooter />
+      </PublicPageShell>
+    );
+  }
+
+  if (notFound || !property) {
     return (
       <PublicPageShell className={styles.browsePage}>
         <LandingHeader />
@@ -42,11 +66,14 @@ export default function PropertyDetailPage() {
   };
 
   const tags = [property.sector, property.propertyType, property.purpose].filter(Boolean);
+  const postedAgo = formatPostedAgo(property.createdAt);
 
   const facts = [];
-  if (property.bedrooms > 0) facts.push({ label: 'Bedrooms', value: property.bedrooms });
-  facts.push({ label: 'Bathrooms', value: property.bathrooms });
-  facts.push({ label: 'Size', value: formatSqFt(property.sizeSqFt) });
+  if (property.bedrooms && Number(property.bedrooms) > 0) {
+    facts.push({ label: 'Bedrooms', value: property.bedrooms });
+  }
+  if (property.bathrooms) facts.push({ label: 'Bathrooms', value: property.bathrooms });
+  if (property.sizeSqFt) facts.push({ label: 'Size', value: formatSqFt(property.sizeSqFt) });
 
   return (
     <PublicPageShell className={styles.browsePage}>
@@ -92,22 +119,24 @@ export default function PropertyDetailPage() {
               </svg>
               {[property.sector, property.area, property.city].filter(Boolean).join(', ')}
             </p>
-            {property.postedAgo && <p className={styles.detailPageMeta}>Listed {property.postedAgo}</p>}
+            {postedAgo && <p className={styles.detailPageMeta}>Listed {postedAgo}</p>}
 
-            <div className={styles.factStrip}>
-              {facts.flatMap((f, i) => [
-                i > 0 ? <span key={`div-${f.label}`} className={styles.factDivider} aria-hidden="true" /> : null,
-                <div key={f.label} className={styles.factItem}>
-                  <p className={styles.factValue}>{f.value}</p>
-                  <p className={styles.factLabel}>{f.label}</p>
-                </div>,
-              ])}
-            </div>
+            {facts.length > 0 && (
+              <div className={styles.factStrip}>
+                {facts.flatMap((f, i) => [
+                  i > 0 ? <span key={`div-${f.label}`} className={styles.factDivider} aria-hidden="true" /> : null,
+                  <div key={f.label} className={styles.factItem}>
+                    <p className={styles.factValue}>{f.value}</p>
+                    <p className={styles.factLabel}>{f.label}</p>
+                  </div>,
+                ])}
+              </div>
+            )}
 
-            {property.description && (
+            {property.address && (
               <div className={styles.modalSection}>
-                <p className={styles.modalSectionTitle}>About this property</p>
-                <p className={styles.modalText}>{property.description}</p>
+                <p className={styles.modalSectionTitle}>Address</p>
+                <p className={styles.modalText}>{property.address}</p>
               </div>
             )}
 
@@ -131,58 +160,24 @@ export default function PropertyDetailPage() {
           <aside className={styles.detailSidebar}>
             <div className={styles.sidebarCard}>
               <div className={styles.sidebarPriceRow}>
-                <p className={styles.sidebarPrice}>
-                  {property.price}
-                  {property.priceNote && <span className={styles.sidebarPriceNote}> {property.priceNote}</span>}
-                </p>
+                <p className={styles.sidebarPrice}>{formatTaka(property.priceDisplay)}</p>
                 {property.status === 'verified' && (
                   <span className={styles.sidebarVerifiedBadge}>✓ Verified</span>
                 )}
               </div>
 
-              {isBuyerAuthenticated ? (
-                <div className={styles.sidebarOwner}>
-                  <p className={styles.sidebarOwnerLabel}>Owner Details</p>
-                  <div className={styles.ownerRow}>
-                    <span className={styles.ownerAvatar} aria-hidden="true">
-                      {(property.ownerName || 'T')[0].toUpperCase()}
-                    </span>
-                    <span className={styles.ownerName}>
-                      {property.ownerName || 'TrueSpace verified owner'}
-                    </span>
-                  </div>
-                  <div className={styles.ownerContactBtns}>
-                    {property.contactNumber && (
-                      <a href={`tel:${property.contactNumber}`} className={styles.ownerContactBtn}>
-                        📞 {property.contactNumber}
-                      </a>
-                    )}
-                    {property.whatsappNumber && (
-                      <a
-                        href={`https://wa.me/${property.whatsappNumber.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={styles.ownerContactBtn}
-                      >
-                        💬 WhatsApp
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className={styles.sidebarOwner}>
-                  <p className={styles.sidebarLockNote}>
-                    🔒 Owner contact details are protected. Sign in to your portal to unlock them.
-                  </p>
-                  <button
-                    type="button"
-                    className={`${styles.btnPrimary} ${styles.sidebarFullBtn}`}
-                    onClick={handleOwnerDetails}
-                  >
-                    See property owner details
-                  </button>
-                </div>
-              )}
+              <div className={styles.sidebarOwner}>
+                <p className={styles.sidebarLockNote}>
+                  Owner contact details stay hidden until you match and accept a listing in your portal.
+                </p>
+                <button
+                  type="button"
+                  className={`${styles.btnPrimary} ${styles.sidebarFullBtn}`}
+                  onClick={handleOwnerDetails}
+                >
+                  See property owner details
+                </button>
+              </div>
             </div>
           </aside>
         </div>

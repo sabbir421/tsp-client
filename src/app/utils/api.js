@@ -1,7 +1,7 @@
 import { clearPortalSession, getActivePortalRole, getActiveToken } from './authStorage';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-export const UPLOAD_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.truespaceproperty.com/api';
+export const UPLOAD_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.truespaceproperty.com/api').replace(/\/api$/, '');
 
 const PUBLIC_PATHS = [
   '/login',
@@ -13,6 +13,12 @@ const PUBLIC_PATHS = [
   '/browse',
 ];
 
+const isPublicPath = (pathname) => {
+  const path = pathname.split('?')[0];
+  if (path === '/') return true;
+  return PUBLIC_PATHS.some((publicPath) => path.startsWith(publicPath));
+};
+
 let isLoggingOut = false;
 
 const clearSessionAndRedirect = () => {
@@ -23,7 +29,7 @@ const clearSessionAndRedirect = () => {
   clearPortalSession(role);
 
   const pathname = `${window.location.pathname}${window.location.search}`;
-  const onPublicPage = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  const onPublicPage = isPublicPath(pathname);
 
   if (!onPublicPage) {
     const next = encodeURIComponent(pathname);
@@ -160,6 +166,8 @@ export const authApi = {
 };
 
 export const propertyApi = {
+  getPublic: () => request('/properties/public'),
+  getPublicOne: (id) => request(`/properties/public/${id}`),
   getAvailable: () => request('/properties/available'),
   getMine: () => request('/properties/mine'),
   getStats: () => request('/properties/mine/stats'),
@@ -172,6 +180,7 @@ export const propertyApi = {
 };
 
 export const requirementApi = {
+  getPublic: () => request('/requirements/public'),
   getMine: () => request('/requirements/mine'),
   getOne: (id) => request(`/requirements/${id}`),
   create: (body) => request('/requirements', { method: 'POST', body: JSON.stringify(body) }),

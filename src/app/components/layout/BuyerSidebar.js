@@ -102,10 +102,7 @@ export default function BuyerSidebar({ open = false, onClose }) {
           <button type="button" className={styles.expertHelpBtn}>Contact Expert</button>
         </div>
         <div className={styles.expertAvatar} aria-hidden="true">
-          <img
-            src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face"
-            alt=""
-          />
+          TS
         </div>
       </div>
 

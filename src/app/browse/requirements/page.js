@@ -1,19 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { USER_ROLES } from '../../constants';
-import { PUBLIC_REQUIREMENTS } from '../../data/publicListings';
 import LandingHeader from '../../components/landing/LandingHeader';
 import LandingFooter from '../../components/landing/LandingFooter';
 import RequirementCard from '../../components/landing/RequirementCard';
 import RequirementDetailModal from '../../components/landing/RequirementDetailModal';
 import { openPortalWindow } from '../../utils/navigation';
+import { requirementApi } from '../../utils/api';
 import PublicPageShell from '../../components/PublicPageShell';
 import styles from '../../components/landing/landing.module.css';
 
 export default function BrowseRequirementsPage() {
   const [selected, setSelected] = useState(null);
+  const [requirements, setRequirements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await requirementApi.getPublic();
+        setRequirements(res.data || []);
+      } catch {
+        setRequirements([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <PublicPageShell className={styles.browsePage}>
@@ -30,11 +46,13 @@ export default function BrowseRequirementsPage() {
       </div>
 
       <div className={`${styles.container} ${styles.browseContent}`}>
-        {PUBLIC_REQUIREMENTS.length === 0 ? (
+        {loading ? (
+          <div className={styles.emptyState}>Loading requirements...</div>
+        ) : requirements.length === 0 ? (
           <div className={styles.emptyState}>No requirements posted yet.</div>
         ) : (
           <div className={styles.reqGrid}>
-            {PUBLIC_REQUIREMENTS.map((req) => (
+            {requirements.map((req) => (
               <RequirementCard
                 key={req.id}
                 requirement={req}

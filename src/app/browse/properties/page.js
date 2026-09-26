@@ -1,19 +1,36 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { USER_ROLES } from '../../constants';
-import { PUBLIC_PROPERTIES } from '../../data/publicListings';
 import LandingHeader from '../../components/landing/LandingHeader';
 import LandingFooter from '../../components/landing/LandingFooter';
 import PropertyCard from '../../components/landing/PropertyCard';
 import { openPortalWindow } from '../../utils/navigation';
 import { hasPortalToken } from '../../utils/authStorage';
+import { propertyApi } from '../../utils/api';
 import PublicPageShell from '../../components/PublicPageShell';
 import styles from '../../components/landing/landing.module.css';
 
 export default function BrowsePropertiesPage() {
   const router = useRouter();
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await propertyApi.getPublic();
+        setProperties(res.data || []);
+      } catch {
+        setProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const handleOwnerDetails = (property) => {
     if (hasPortalToken(USER_ROLES.BUYER_TENANT)) {
@@ -32,17 +49,19 @@ export default function BrowsePropertiesPage() {
           <Link href="/" className={styles.backLink}>← Back to home</Link>
           <h1 className={styles.browseHeroTitle}>All Properties</h1>
           <p className={styles.browseHeroSub}>
-            Browse verified listings in Uttara and across Dhaka. No account needed to view details.
+            Browse listings posted by sellers and agents. No account needed to view details.
           </p>
         </div>
       </div>
 
       <div className={`${styles.container} ${styles.browseContent}`}>
-        {PUBLIC_PROPERTIES.length === 0 ? (
+        {loading ? (
+          <div className={styles.emptyState}>Loading properties...</div>
+        ) : properties.length === 0 ? (
           <div className={styles.emptyState}>No properties available yet.</div>
         ) : (
           <div className={styles.propGrid}>
-            {PUBLIC_PROPERTIES.map((prop) => (
+            {properties.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}

@@ -1,12 +1,16 @@
 'use client';
 
+import { formatPostedAgo } from '../../utils/format';
 import styles from './landing.module.css';
 
 export default function RequirementCard({ requirement, onViewDetails, onSuggest }) {
+  const postedAgo = formatPostedAgo(requirement.createdAt);
+  const sector = requirement.sector || requirement.area || requirement.zone;
+
   return (
     <article className={styles.reqCard}>
       <div className={styles.reqCardTop}>
-        <span className={styles.reqSector}>{requirement.sector}</span>
+        {sector && <span className={styles.reqSector}>{sector}</span>}
         {requirement.isLive && (
           <span className={styles.liveBadge}>
             <span className={styles.liveDot} />
@@ -15,16 +19,11 @@ export default function RequirementCard({ requirement, onViewDetails, onSuggest 
         )}
       </div>
       <h3 className={styles.reqTitle}>{requirement.title}</h3>
-      <p className={styles.reqBudget}>
-        {requirement.budget}
-        {requirement.budgetNote && <span style={{ fontSize: '0.85rem', fontWeight: 500 }}> {requirement.budgetNote}</span>}
-      </p>
+      <p className={styles.reqBudget}>{requirement.budget || requirement.budgetDisplay}</p>
       <div className={styles.reqMeta}>
-        <span>Move-in: {requirement.moveIn}</span>
+        {postedAgo && <span>{postedAgo}</span>}
         <span>·</span>
-        <span>{requirement.postedAgo}</span>
-        <span>·</span>
-        <span>{requirement.suggestionsCount} suggestions</span>
+        <span>{requirement.suggestionsCount || 0} suggestions</span>
       </div>
       <div className={styles.reqFooter}>
         <button type="button" className={styles.btnSecondary} onClick={() => onViewDetails(requirement)}>
