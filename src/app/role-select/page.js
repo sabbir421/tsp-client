@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
@@ -9,7 +9,7 @@ import { setSelectedRole } from '../store/slices/authSlice';
 import { buildAuthHref, getSafeNextPath } from '../utils/navigation';
 import styles from '../components/auth/auth.module.css';
 
-export default function RoleSelectPage() {
+function RoleSelectPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
@@ -53,5 +53,13 @@ export default function RoleSelectPage() {
         </button>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function RoleSelectPage() {
+  return (
+    <Suspense fallback={null}>
+      <RoleSelectPageContent />
+    </Suspense>
   );
 }

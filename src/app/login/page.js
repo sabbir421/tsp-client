@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,7 +11,7 @@ import { ROLE_OPTIONS } from '../constants';
 import { buildRoleSelectHref, getSafeNextPath } from '../utils/navigation';
 import styles from '../components/auth/auth.module.css';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
@@ -205,5 +205,13 @@ export default function LoginPage() {
         Don&apos;t have an account? <Link href="/signup">Register Now</Link>
       </p>
     </AuthLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
