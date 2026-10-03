@@ -1607,7 +1607,7 @@
     grid-template-columns: 1fr;
   }
 
-  .headerActions .textLink {
+  .headerActions {
     display: none;
   }
 
@@ -1623,3 +1623,135 @@
     align-items: flex-start;
   }
 }
+
+/* ── Mobile Drawer ── */
+.mobileToggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mobileToggle span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--navy);
+  border-radius: 1px;
+}
+
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(2, 8, 23, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  z-index: 999;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.22);
+  padding: 24px 20px;
+  overflow-y: auto;
+  animation: drawerSlideIn 0.25s ease-out;
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.drawerCloseBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: #f8fafc;
+  color: var(--text);
+  font-size: 1.4rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  line-height: 1;
+  transition: background var(--transition);
+}
+
+.drawerCloseBtn:hover {
+  background: var(--border-light);
+}
+
+.drawerNav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.drawerNavLink {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  transition: color var(--transition);
+}
+
+.drawerNavLink:hover {
+  color: var(--primary);
+}
+
+.drawerActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.drawerBtn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .mobileToggle {
+    display: flex;
+  }
+
+  .headerActions {
+    display: none;
+  }
+}
+

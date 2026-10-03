@@ -23,6 +23,7 @@ import {
 import styles from './dashboard.module.css';
 
 const NAV_ITEMS = [
+  { label: 'Home', href: '/', icon: IconHome },
   { label: 'Dashboard', href: '/dashboard', icon: IconDashboard },
   { label: 'Post Property', href: '/dashboard/post-property', icon: IconPlus },
   { label: 'My Properties', href: '/dashboard/my-properties', icon: IconProperties },
@@ -72,7 +73,9 @@ export default function Sidebar({ open = false, onClose }) {
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive =
             href !== '#' &&
-            (pathname === href || (href !== '/dashboard' && pathname.startsWith(href)));
+            (href === '/'
+              ? pathname === '/'
+              : pathname === href || (href !== '/dashboard' && pathname.startsWith(href)));
 
           if (href === '#') {
             return (

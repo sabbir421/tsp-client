@@ -23,9 +23,16 @@
 
 .cardHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.categoryWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .cardCategory {
@@ -33,43 +40,113 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--primary);
+  color: var(--primary-dark);
   background: var(--primary-light);
   padding: 4px 10px;
   border-radius: 20px;
 }
 
-.cardTitle {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.4;
+.subTypePill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-.cardSummary {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.5;
+.cardMain {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.cardTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.35;
+  flex: 1;
 }
 
 .cardBudget {
-  font-size: 1.15rem;
-  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.budgetLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.budgetValue {
+  font-size: 1.1rem;
+  font-weight: 800;
   color: var(--primary);
 }
 
-.cardMeta {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+.specsGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 10px 16px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
 }
 
-.cardMeta span {
+.specItem {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+
+.specIcon {
+  font-size: 0.9rem;
+}
+
+.specText {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mustIncludeBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.mustIncludeTag {
+  font-weight: 700;
+  color: #c2410c;
+  flex-shrink: 0;
+}
+
+.mustIncludeText {
+  color: #9a3412;
+  line-height: 1.4;
+}
+
+.notesBox {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 .cardActions {

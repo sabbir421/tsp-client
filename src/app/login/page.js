@@ -11,6 +11,8 @@ import { ROLE_OPTIONS } from '../constants';
 import { buildRoleSelectHref, getSafeNextPath } from '../utils/navigation';
 import styles from '../components/auth/auth.module.css';
 
+const OTP_RESEND_INTERVAL = 60; // seconds
+
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,6 +28,10 @@ function LoginPageContent() {
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [otpStep, setOtpStep] = useState(1);
+  const [localError, setLocalError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -41,6 +47,19 @@ function LoginPageContent() {
     }
   }, [isAuthenticated, nextPath, router]);
 
+  // Resend Timer Countdown Effect
+  useEffect(() => {
+    let interval = null;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
   const roleLabel = ROLE_OPTIONS.find((r) => r.value === selectedRole)?.label;
 
   const handleLogin = async (e) => {
@@ -49,14 +68,39 @@ function LoginPageContent() {
     await dispatch(loginUser({ identifier, password, role: selectedRole }));
   };
 
-  const handleSendOtp = async () => {
-    if (!identifier) return;
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    if (!identifier) {
+      setLocalError('Please enter your email or phone number first');
+      return;
+    }
+    setLocalError('');
+    setSuccessMessage('');
     setOtpLoading(true);
     try {
       await authApi.sendLoginOtp({ identifier, role: selectedRole });
       setOtpSent(true);
+      setOtpStep(2);
+      setResendTimer(OTP_RESEND_INTERVAL);
     } catch (err) {
-      alert(err.message);
+      setLocalError(err.message || 'Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendLoginOtp = async () => {
+    if (resendTimer > 0 || otpLoading) return;
+    setLocalError('');
+    setSuccessMessage('');
+    setOtpLoading(true);
+    try {
+      await authApi.sendLoginOtp({ identifier, role: selectedRole });
+      setOtpSent(true);
+      setResendTimer(OTP_RESEND_INTERVAL);
+      setSuccessMessage('A new OTP has been sent successfully.');
+    } catch (err) {
+      setLocalError(err.message || 'Failed to resend OTP');
     } finally {
       setOtpLoading(false);
     }
@@ -64,8 +108,14 @@ function LoginPageContent() {
 
   const handleOtpLogin = async (e) => {
     e.preventDefault();
+    setLocalError('');
+    setSuccessMessage('');
+    if (!otpCode || otpCode.trim().length !== 6) {
+      setLocalError('Please enter a valid 6-digit OTP code');
+      return;
+    }
     dispatch(clearError());
-    await dispatch(loginWithOtp({ identifier, otpCode, role: selectedRole }));
+    await dispatch(loginWithOtp({ identifier, otpCode: otpCode.trim(), role: selectedRole }));
   };
 
   const handleChangeRole = () => {
@@ -76,7 +126,14 @@ function LoginPageContent() {
   if (!isHydrated || !selectedRole) return null;
 
   return (
-    <AuthLayout title="Welcome back!" subtitle="Sign in to continue to your account.">
+    <AuthLayout
+      title={otpMode && otpStep === 2 ? 'Verify Verification Code' : 'Welcome back!'}
+      subtitle={
+        otpMode && otpStep === 2
+          ? `Enter the 6-digit code sent to ${identifier}`
+          : 'Sign in to continue to your account.'
+      }
+    >
       <div className={styles.selectedRoleBadge}>
         {roleLabel}
         <button type="button" className={styles.changeRole} onClick={handleChangeRole}>
@@ -84,7 +141,8 @@ function LoginPageContent() {
         </button>
       </div>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {(error || localError) && <div className={styles.error}>{error || localError}</div>}
+      {successMessage && <div className={styles.success}>{successMessage}</div>}
 
       {!otpMode ? (
         <form className={styles.form} onSubmit={handleLogin}>
@@ -143,12 +201,19 @@ function LoginPageContent() {
 
           <div className={styles.divider}>OR</div>
 
-          <button type="button" className={styles.secondaryBtn} onClick={() => setOtpMode(true)}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => {
+              setOtpMode(true);
+              setOtpStep(1);
+            }}
+          >
             Login with phone OTP
           </button>
         </form>
-      ) : (
-        <form className={styles.form} onSubmit={handleOtpLogin}>
+      ) : otpStep === 1 ? (
+        <form className={styles.form} onSubmit={handleSendOtp}>
           <div className={styles.inputGroup}>
             <label className={styles.label}>Email or Phone Number</label>
             <div className={styles.inputWrap}>
@@ -156,7 +221,7 @@ function LoginPageContent() {
               <input
                 className={styles.input}
                 type="text"
-                placeholder="Enter email or phone"
+                placeholder="Enter registered email or phone"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required
@@ -164,39 +229,62 @@ function LoginPageContent() {
             </div>
           </div>
 
-          {otpSent && (
-            <p className={styles.otpHint}>We&apos;ve sent a 6-digit code to your registered phone.</p>
-          )}
+          <button type="submit" className={styles.primaryBtn} disabled={otpLoading}>
+            {otpLoading ? 'Sending OTP...' : 'Send OTP & Proceed'}
+          </button>
 
-          <div className={styles.otpRow}>
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>Enter OTP</label>
-              <input
-                className={`${styles.input} ${styles.inputNoIcon}`}
-                type="text"
-                placeholder="6-digit OTP"
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
-                maxLength={6}
-                required
-              />
-            </div>
-            <button
-              type="button"
-              className={styles.sendOtpBtn}
-              onClick={handleSendOtp}
-              disabled={otpLoading || !identifier}
-            >
-              {otpSent ? 'Resend OTP' : 'Send OTP'}
-            </button>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => setOtpMode(false)}
+          >
+            Back to Password Login
+          </button>
+        </form>
+      ) : (
+        <form className={styles.form} onSubmit={handleOtpLogin}>
+          <div className={styles.illustration}>📱</div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Enter 6-Digit OTP Code</label>
+            <input
+              className={`${styles.input} ${styles.inputNoIcon}`}
+              type="text"
+              placeholder="e.g. 123456"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value)}
+              maxLength={6}
+              required
+              autoFocus
+            />
+            {otpSent && (
+              <p className={styles.otpHint}>Code sent to {identifier}</p>
+            )}
           </div>
 
           <button type="submit" className={styles.primaryBtn} disabled={loading}>
-            {loading ? 'Verifying...' : 'Sign In with OTP'}
+            {loading ? 'Verifying...' : 'Verify & Sign In'}
           </button>
 
-          <button type="button" className={styles.secondaryBtn} onClick={() => setOtpMode(false)}>
-            Back to Password Login
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={handleResendLoginOtp}
+            disabled={resendTimer > 0 || otpLoading}
+          >
+            {otpLoading
+              ? 'Sending...'
+              : resendTimer > 0
+              ? `Resend OTP (${resendTimer}s)`
+              : 'Resend OTP'}
+          </button>
+
+          <button
+            type="button"
+            className={styles.textLinkBtn}
+            onClick={() => setOtpStep(1)}
+          >
+            ← Change Email / Phone
           </button>
         </form>
       )}

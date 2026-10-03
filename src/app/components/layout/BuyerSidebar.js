@@ -20,6 +20,7 @@ import layoutStyles from './dashboard.module.css';
 import styles from './buyerLayout.module.css';
 
 const NAV_ITEMS = [
+  { label: 'Home', href: '/', icon: IconHome },
   { label: 'Dashboard', href: '/dashboard', icon: IconDashboard },
   { label: 'My Requirements', href: '/dashboard/my-requirements', icon: IconRequirements },
   { label: 'Matched Properties', href: '/dashboard/matched-properties', icon: IconMatched },
@@ -68,7 +69,9 @@ export default function BuyerSidebar({ open = false, onClose }) {
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive =
             href !== '#' &&
-            (pathname === href || (href !== '/dashboard' && pathname.startsWith(href)));
+            (href === '/'
+              ? pathname === '/'
+              : pathname === href || (href !== '/dashboard' && pathname.startsWith(href)));
 
           if (href === '#') {
             return (

@@ -123,41 +123,82 @@ export default function MyRequirementsPage() {
         </div>
       ) : (
         <div className={styles.requirementGrid}>
-          {requirements.map((req) => (
-            <article key={req.id} className={styles.requirementCard}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardCategory}>
-                  {req.category === 'residential' ? 'Residential' : 'Commercial'}
-                </span>
-                <span className={`${styles.badge} ${BADGE_CLASS[req.status] || styles.badgeActive}`}>
-                  {req.statusLabel}
-                </span>
-              </div>
+          {requirements.map((req) => {
+            const locationText = [req.area, req.zone, req.city].filter(Boolean).join(', ');
 
-              <h2 className={styles.cardTitle}>{req.title}</h2>
-              <p className={styles.cardSummary}>{req.summary}</p>
-              <p className={styles.cardBudget}>{req.budgetDisplay}</p>
+            return (
+              <article key={req.id} className={styles.requirementCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.categoryWrap}>
+                    <span className={styles.cardCategory}>
+                      {req.category === 'residential' ? 'Residential' : 'Commercial'}
+                    </span>
+                    {req.subType && <span className={styles.subTypePill}>{req.subType}</span>}
+                  </div>
+                  <span className={`${styles.badge} ${BADGE_CLASS[req.status] || styles.badgeActive}`}>
+                    {req.statusLabel}
+                  </span>
+                </div>
 
-              <div className={styles.cardMeta}>
-                {req.subType && <span>{req.subType}</span>}
-                {req.sizeSqFt && <span>{req.sizeSqFt} sft</span>}
-                {req.area && <span>Sector: {req.area}</span>}
-                {req.zone && <span>{req.zone}</span>}
-                {req.city && <span>{req.city}</span>}
-              </div>
+                <div className={styles.cardMain}>
+                  <h2 className={styles.cardTitle}>
+                    {locationText || 'Requirement Details'}
+                  </h2>
+                  <div className={styles.cardBudget}>
+                    <span className={styles.budgetLabel}>Max Budget</span>
+                    <span className={styles.budgetValue}>{req.budgetDisplay}</span>
+                  </div>
+                </div>
 
-              <div className={styles.cardActions}>
-                <button
-                  type="button"
-                  className={styles.deleteBtn}
-                  disabled={deletingId === req.id}
-                  onClick={() => handleDelete(req.id, req.title)}
-                >
-                  {deletingId === req.id ? 'Deleting…' : 'Delete'}
-                </button>
-              </div>
-            </article>
-          ))}
+                <div className={styles.specsGrid}>
+                  {req.sizeSqFt && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specIcon}>📐</span>
+                      <span className={styles.specText}>{req.sizeSqFt} sq ft</span>
+                    </div>
+                  )}
+                  {req.bedrooms && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specIcon}>🛏️</span>
+                      <span className={styles.specText}>{req.bedrooms} Bed</span>
+                    </div>
+                  )}
+                  {(req.floor || req.totalFloors) && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specIcon}>🏢</span>
+                      <span className={styles.specText}>
+                        Floor {req.floor || '-'}{req.totalFloors ? ` of ${req.totalFloors}` : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {req.mustIncludeDetails && (
+                  <div className={styles.mustIncludeBox}>
+                    <span className={styles.mustIncludeTag}>Must Have:</span>
+                    <span className={styles.mustIncludeText}>{req.mustIncludeDetails}</span>
+                  </div>
+                )}
+
+                {req.residentialNotes && !req.mustIncludeDetails && (
+                  <div className={styles.notesBox}>
+                    <span className={styles.notesText}>{req.residentialNotes}</span>
+                  </div>
+                )}
+
+                <div className={styles.cardActions}>
+                  <button
+                    type="button"
+                    className={styles.deleteBtn}
+                    disabled={deletingId === req.id}
+                    onClick={() => handleDelete(req.id, locationText || req.subType || 'Requirement')}
+                  >
+                    {deletingId === req.id ? 'Deleting…' : 'Delete Requirement'}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
