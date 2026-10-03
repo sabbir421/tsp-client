@@ -17,7 +17,8 @@ function SignupPageContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { selectedRole, loading, error, isAuthenticated, isHydrated } = useSelector((state) => state.auth);
-  const nextPath = getSafeNextPath(searchParams.get('next'), '/dashboard');
+  const rawNext = searchParams.get('next');
+  const nextPath = getSafeNextPath(rawNext, '/dashboard');
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -42,7 +43,7 @@ function SignupPageContent() {
     if (!isHydrated) return;
 
     if (isAuthenticated) {
-      router.push(nextPath);
+      router.replace(nextPath);
     }
   }, [isAuthenticated, isHydrated, nextPath, router]);
 
@@ -123,7 +124,7 @@ function SignupPageContent() {
       return;
     }
     dispatch(clearError());
-    await dispatch(
+    const res = await dispatch(
       registerUser({
         fullName: form.fullName.trim(),
         phone: form.phone.trim(),
@@ -133,6 +134,10 @@ function SignupPageContent() {
         otpCode: form.otpCode.trim(),
       })
     );
+
+    if (registerUser.fulfilled.match(res)) {
+      router.replace(nextPath);
+    }
   };
 
   return (

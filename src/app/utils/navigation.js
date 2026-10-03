@@ -2,7 +2,15 @@ import { USER_ROLES } from '../constants';
 import { getActivePortalRole, hasAnyPortalToken, hasPortalToken } from './authStorage';
 
 export function getSafeNextPath(value, fallback = '/dashboard') {
-  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
+  if (
+    typeof value !== 'string' ||
+    !value.startsWith('/') ||
+    value.startsWith('//') ||
+    value.startsWith('/role-select') ||
+    value.startsWith('/login') ||
+    value.startsWith('/signup') ||
+    value.startsWith('/portal-gate')
+  ) {
     return fallback;
   }
 
@@ -13,7 +21,7 @@ export function buildRoleSelectHref(nextPath, role) {
   const params = new URLSearchParams();
   const safeNext = getSafeNextPath(nextPath, '');
 
-  if (safeNext) {
+  if (safeNext && safeNext !== '/dashboard') {
     params.set('next', safeNext);
   }
 
@@ -29,7 +37,7 @@ export function buildAuthHref(basePath, nextPath, role) {
   const params = new URLSearchParams();
   const safeNext = getSafeNextPath(nextPath, '');
 
-  if (safeNext) {
+  if (safeNext && safeNext !== '/dashboard') {
     params.set('next', safeNext);
   }
 
@@ -44,7 +52,10 @@ export function buildAuthHref(basePath, nextPath, role) {
 export function buildPortalGateHref(nextPath, role) {
   const params = new URLSearchParams();
   params.set('role', role);
-  params.set('next', getSafeNextPath(nextPath, '/dashboard'));
+  const safeNext = getSafeNextPath(nextPath, '/dashboard');
+  if (safeNext !== '/dashboard') {
+    params.set('next', safeNext);
+  }
   return `/portal-gate?${params.toString()}`;
 }
 
@@ -80,13 +91,6 @@ export function getPortalEntryHref(nextPath, role) {
   return buildRoleSelectHref(safeNext, role);
 }
 
-/**
- * Same window when:
- * - no portal token exists, or
- * - user is opening a portal they already have a token for
- *
- * New window only when switching to a different portal while another session exists.
- */
 export function openPortalWindow(nextPath, role) {
   const href = getPortalEntryHref(nextPath, role);
   const hasTargetToken = role ? hasPortalToken(role) : false;

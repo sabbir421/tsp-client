@@ -18,7 +18,8 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { selectedRole, loading, error, isAuthenticated, isHydrated } = useSelector((state) => state.auth);
-  const nextPath = getSafeNextPath(searchParams.get('next'), '/dashboard');
+  const rawNext = searchParams.get('next');
+  const nextPath = getSafeNextPath(rawNext, '/dashboard');
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +44,7 @@ function LoginPageContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push(nextPath);
+      router.replace(nextPath);
     }
   }, [isAuthenticated, nextPath, router]);
 
@@ -65,7 +66,10 @@ function LoginPageContent() {
   const handleLogin = async (e) => {
     e.preventDefault();
     dispatch(clearError());
-    await dispatch(loginUser({ identifier, password, role: selectedRole }));
+    const res = await dispatch(loginUser({ identifier, password, role: selectedRole }));
+    if (loginUser.fulfilled.match(res)) {
+      router.replace(nextPath);
+    }
   };
 
   const handleSendOtp = async (e) => {
@@ -115,7 +119,10 @@ function LoginPageContent() {
       return;
     }
     dispatch(clearError());
-    await dispatch(loginWithOtp({ identifier, otpCode: otpCode.trim(), role: selectedRole }));
+    const res = await dispatch(loginWithOtp({ identifier, otpCode: otpCode.trim(), role: selectedRole }));
+    if (loginWithOtp.fulfilled.match(res)) {
+      router.replace(nextPath);
+    }
   };
 
   const handleChangeRole = () => {

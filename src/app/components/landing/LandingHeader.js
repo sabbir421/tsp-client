@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -15,6 +16,11 @@ export default function LandingHeader() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const goBuyer = (path) => {
     setDrawerOpen(false);
@@ -49,6 +55,98 @@ export default function LandingHeader() {
       document.body.style.overflow = '';
     };
   }, [drawerOpen]);
+
+  const renderDrawer = () => {
+    if (!drawerOpen || !mounted) return null;
+    return createPortal(
+      <>
+        <div
+          className={styles.drawerBackdrop}
+          onClick={closeDrawer}
+          aria-hidden="true"
+        />
+        <div
+          className={styles.mobileDrawer}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation Menu"
+        >
+          <div className={styles.drawerHeader}>
+            <Link href="/" className={styles.logoLink} onClick={closeDrawer}>
+              <Image src="/logo.png" alt="TrueSpace" width={120} height={30} className={styles.logoImg} />
+            </Link>
+            <button
+              type="button"
+              className={styles.drawerCloseBtn}
+              onClick={closeDrawer}
+              aria-label="Close menu"
+            >
+              ×
+            </button>
+          </div>
+
+          <nav className={styles.drawerNav}>
+            <Link href="/browse/requirements" className={styles.drawerNavLink} onClick={closeDrawer}>
+              Requirements
+            </Link>
+            <Link href="/browse/properties" className={styles.drawerNavLink} onClick={closeDrawer}>
+              Properties
+            </Link>
+            <button type="button" className={styles.drawerNavBtnLink} onClick={handleProfileClick}>
+              Profile 👤
+            </button>
+            <a href="#bachelor" className={styles.drawerNavLink} onClick={closeDrawer}>
+              Bachelor Feed
+            </a>
+            <a href="#how-it-works" className={styles.drawerNavLink} onClick={closeDrawer}>
+              About
+            </a>
+            <a href="#contact" className={styles.drawerNavLink} onClick={closeDrawer}>
+              Contact
+            </a>
+          </nav>
+
+          <div className={styles.drawerActions}>
+            <button
+              type="button"
+              className={`${styles.pillBtn} ${styles.drawerBtn}`}
+              onClick={() => goSeller('/dashboard/post-property')}
+            >
+              List a property
+            </button>
+            <button
+              type="button"
+              className={`${styles.btnSecondary} ${styles.drawerBtn}`}
+              onClick={() => goBuyer('/dashboard/my-requirements?create=1')}
+            >
+              Post a requirement
+            </button>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className={styles.textLink}
+                onClick={() => {
+                  dispatch(logout());
+                  closeDrawer();
+                }}
+              >
+                Log out
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.textLink}
+                onClick={() => goBuyer('/role-select')}
+              >
+                Log in
+              </button>
+            )}
+          </div>
+        </div>
+      </>,
+      document.body
+    );
+  };
 
   return (
     <header className={styles.header}>
@@ -99,88 +197,7 @@ export default function LandingHeader() {
         </button>
       </div>
 
-      {drawerOpen && (
-        <>
-          <div
-            className={styles.drawerBackdrop}
-            onClick={closeDrawer}
-            aria-hidden="true"
-          />
-          <div className={styles.mobileDrawer} role="dialog" aria-modal="true" aria-label="Navigation Menu">
-            <div className={styles.drawerHeader}>
-              <Link href="/" className={styles.logoLink} onClick={closeDrawer}>
-                <Image src="/logo.png" alt="TrueSpace" width={120} height={30} className={styles.logoImg} />
-              </Link>
-              <button
-                type="button"
-                className={styles.drawerCloseBtn}
-                onClick={closeDrawer}
-                aria-label="Close menu"
-              >
-                ×
-              </button>
-            </div>
-
-            <nav className={styles.drawerNav}>
-              <Link href="/browse/requirements" className={styles.drawerNavLink} onClick={closeDrawer}>
-                Requirements
-              </Link>
-              <Link href="/browse/properties" className={styles.drawerNavLink} onClick={closeDrawer}>
-                Properties
-              </Link>
-              <button type="button" className={styles.drawerNavBtnLink} onClick={handleProfileClick}>
-                Profile 👤
-              </button>
-              <a href="#bachelor" className={styles.drawerNavLink} onClick={closeDrawer}>
-                Bachelor Feed
-              </a>
-              <a href="#how-it-works" className={styles.drawerNavLink} onClick={closeDrawer}>
-                About
-              </a>
-              <a href="#contact" className={styles.drawerNavLink} onClick={closeDrawer}>
-                Contact
-              </a>
-            </nav>
-
-            <div className={styles.drawerActions}>
-              <button
-                type="button"
-                className={`${styles.pillBtn} ${styles.drawerBtn}`}
-                onClick={() => goSeller('/dashboard/post-property')}
-              >
-                List a property
-              </button>
-              <button
-                type="button"
-                className={`${styles.btnSecondary} ${styles.drawerBtn}`}
-                onClick={() => goBuyer('/dashboard/my-requirements?create=1')}
-              >
-                Post a requirement
-              </button>
-              {isAuthenticated ? (
-                <button
-                  type="button"
-                  className={styles.textLink}
-                  onClick={() => {
-                    dispatch(logout());
-                    closeDrawer();
-                  }}
-                >
-                  Log out
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={styles.textLink}
-                  onClick={() => goBuyer('/role-select')}
-                >
-                  Log in
-                </button>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+      {renderDrawer()}
     </header>
   );
 }
