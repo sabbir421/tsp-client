@@ -7,6 +7,7 @@ import { USER_ROLES } from '../../constants';
 import LandingHeader from '../../components/landing/LandingHeader';
 import LandingFooter from '../../components/landing/LandingFooter';
 import PropertyCard from '../../components/landing/PropertyCard';
+import FilterBar, { filterItems } from '../../components/common/FilterBar';
 import { openPortalWindow } from '../../utils/navigation';
 import { hasPortalToken } from '../../utils/authStorage';
 import { propertyApi } from '../../utils/api';
@@ -16,6 +17,7 @@ import styles from '../../components/landing/landing.module.css';
 export default function BrowsePropertiesPage() {
   const router = useRouter();
   const [properties, setProperties] = useState([]);
+  const [filter, setFilter] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export default function BrowsePropertiesPage() {
     };
     load();
   }, []);
+
+  const filteredProperties = filterItems(properties, filter);
 
   const handleOwnerDetails = (property) => {
     if (hasPortalToken(USER_ROLES.BUYER_TENANT)) {
@@ -49,19 +53,28 @@ export default function BrowsePropertiesPage() {
           <Link href="/" className={styles.backLink}>← Back to home</Link>
           <h1 className={styles.browseHeroTitle}>All Properties</h1>
           <p className={styles.browseHeroSub}>
-            Browse listings posted by sellers and agents. No account needed to view details.
+            Browse listings posted by sellers and agents. Use filters to narrow down by price, location, or bedrooms.
           </p>
         </div>
       </div>
 
       <div className={`${styles.container} ${styles.browseContent}`}>
+        <FilterBar
+          onFilterChange={setFilter}
+          placeholder="Filter properties by title, sector, area, city..."
+        />
+
         {loading ? (
           <div className={styles.emptyState}>Loading properties...</div>
-        ) : properties.length === 0 ? (
-          <div className={styles.emptyState}>No properties available yet.</div>
+        ) : filteredProperties.length === 0 ? (
+          <div className={styles.emptyState}>
+            {properties.length === 0
+              ? 'No properties available yet.'
+              : 'No properties match your filter criteria.'}
+          </div>
         ) : (
           <div className={styles.propGrid}>
-            {properties.map((prop) => (
+            {filteredProperties.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}

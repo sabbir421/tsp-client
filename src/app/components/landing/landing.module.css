@@ -14,7 +14,7 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 9990;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -56,6 +56,21 @@
 .navLink:hover {
   color: var(--navy);
   text-decoration: none;
+}
+
+.navBtnLink {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition);
+}
+
+.navBtnLink:hover {
+  color: var(--navy);
 }
 
 .headerActions {
@@ -1651,7 +1666,7 @@
 .drawerBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 998;
+  z-index: 9998;
   background: rgba(2, 8, 23, 0.55);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -1663,7 +1678,7 @@
   right: 0;
   bottom: 0;
   width: min(320px, 85vw);
-  z-index: 999;
+  z-index: 9999;
   background: white;
   display: flex;
   flex-direction: column;
@@ -1728,6 +1743,24 @@
 }
 
 .drawerNavLink:hover {
+  color: var(--primary);
+}
+
+.drawerNavBtnLink {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 10px 0;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: color var(--transition);
+}
+
+.drawerNavBtnLink:hover {
   color: var(--primary);
 }
 

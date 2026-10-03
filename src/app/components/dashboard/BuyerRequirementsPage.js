@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { matchApi, propertyApi } from '../../utils/api';
+import FilterBar, { filterItems } from '../common/FilterBar';
 import common from './pageCommon.module.css';
 import styles from './buyerRequirements.module.css';
 
 export default function BuyerRequirementsPage() {
   const [requirements, setRequirements] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [filter, setFilter] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedReq, setSelectedReq] = useState(null);
@@ -34,6 +36,8 @@ export default function BuyerRequirementsPage() {
     };
     load();
   }, []);
+
+  const filteredRequirements = filterItems(requirements, filter);
 
   const openMatchModal = (req) => {
     setSelectedReq(req);
@@ -96,19 +100,28 @@ export default function BuyerRequirementsPage() {
         </div>
       </div>
 
+      <FilterBar
+        onFilterChange={setFilter}
+        placeholder="Filter buyer requirements by title, sector, area..."
+      />
+
       {error && <div className={common.error}>{error}</div>}
 
-      {requirements.length === 0 ? (
+      {filteredRequirements.length === 0 ? (
         <div className={common.emptyState}>
           <div className={common.emptyIcon}>📝</div>
-          <h2 className={common.emptyTitle}>No active requirements</h2>
+          <h2 className={common.emptyTitle}>
+            {requirements.length === 0 ? 'No active requirements' : 'No requirements match your filter'}
+          </h2>
           <p className={common.emptyDesc}>
-            When buyers post requirements, they will appear here for you to match.
+            {requirements.length === 0
+              ? 'When buyers post requirements, they will appear here for you to match.'
+              : 'Try adjusting your filter choices.'}
           </p>
         </div>
       ) : (
         <div className={styles.requirementList}>
-          {requirements.map((req) => (
+          {filteredRequirements.map((req) => (
             <article key={req.id} className={styles.requirementItem}>
               <div className={styles.itemMain}>
                 <h2 className={styles.itemTitle}>{req.title}</h2>

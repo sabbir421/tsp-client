@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { propertyApi, getUploadUrl } from '../../utils/api';
 import { formatSqFt } from '../../utils/format';
+import FilterBar, { filterItems } from '../common/FilterBar';
 import common from './pageCommon.module.css';
 import cardStyles from './myProperties.module.css';
 import modalStyles from './matchedProperties.module.css';
@@ -196,6 +197,7 @@ function PropertyDetailModal({ property, onClose }) {
 
 export default function AvailablePropertiesPage() {
   const [properties, setProperties] = useState([]);
+  const [filter, setFilter] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
@@ -214,6 +216,8 @@ export default function AvailablePropertiesPage() {
     };
     load();
   }, []);
+
+  const filteredProperties = filterItems(properties, filter);
 
   if (loading) {
     return (
@@ -236,19 +240,28 @@ export default function AvailablePropertiesPage() {
         </div>
       </div>
 
+      <FilterBar
+        onFilterChange={setFilter}
+        placeholder="Filter available properties by title, sector, area, city..."
+      />
+
       {error && <div className={common.error}>{error}</div>}
 
-      {properties.length === 0 ? (
+      {filteredProperties.length === 0 ? (
         <div className={common.emptyState}>
           <div className={common.emptyIcon}>🏢</div>
-          <h2 className={common.emptyTitle}>No properties listed yet</h2>
+          <h2 className={common.emptyTitle}>
+            {properties.length === 0 ? 'No properties listed yet' : 'No properties match your filter'}
+          </h2>
           <p className={common.emptyDesc}>
-            When sellers post properties, they will appear here for browsing.
+            {properties.length === 0
+              ? 'When sellers post properties, they will appear here for browsing.'
+              : 'Try clearing or changing your filter options.'}
           </p>
         </div>
       ) : (
         <div className={cardStyles.propertyGrid}>
-          {properties.map((property) => (
+          {filteredProperties.map((property) => (
             <article key={property.id} className={cardStyles.propertyCard}>
               {property.photos?.[0] ? (
                 <PropertyMedia

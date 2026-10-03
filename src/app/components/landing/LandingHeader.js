@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { USER_ROLES } from '../../constants';
 import { openPortalWindow } from '../../utils/navigation';
@@ -10,6 +11,7 @@ import { logout } from '../../store/slices/authSlice';
 import styles from './landing.module.css';
 
 export default function LandingHeader() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -18,12 +20,22 @@ export default function LandingHeader() {
     setDrawerOpen(false);
     openPortalWindow(path, USER_ROLES.BUYER_TENANT);
   };
+
   const goSeller = (path) => {
     setDrawerOpen(false);
     openPortalWindow(path, USER_ROLES.SELLER_AGENT);
   };
 
   const closeDrawer = () => setDrawerOpen(false);
+
+  const handleProfileClick = () => {
+    closeDrawer();
+    if (isAuthenticated) {
+      router.push('/dashboard/profile');
+    } else {
+      router.push('/login');
+    }
+  };
 
   useEffect(() => {
     if (!drawerOpen) return undefined;
@@ -49,6 +61,9 @@ export default function LandingHeader() {
           <Link href="/browse/requirements" className={styles.navLink}>Requirements</Link>
           <Link href="/browse/properties" className={styles.navLink}>Properties</Link>
           <a href="#bachelor" className={styles.navLink}>Bachelor Feed</a>
+          <button type="button" className={styles.navBtnLink} onClick={handleProfileClick}>
+            Profile
+          </button>
           <a href="#how-it-works" className={styles.navLink}>About</a>
           <a href="#contact" className={styles.navLink}>Contact</a>
         </nav>
@@ -113,6 +128,9 @@ export default function LandingHeader() {
               <Link href="/browse/properties" className={styles.drawerNavLink} onClick={closeDrawer}>
                 Properties
               </Link>
+              <button type="button" className={styles.drawerNavBtnLink} onClick={handleProfileClick}>
+                Profile 👤
+              </button>
               <a href="#bachelor" className={styles.drawerNavLink} onClick={closeDrawer}>
                 Bachelor Feed
               </a>
