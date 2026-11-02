@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { matchApi, propertyApi } from '../../utils/api';
 import FilterBar, { filterItems } from '../common/FilterBar';
 import common from './pageCommon.module.css';
@@ -38,10 +39,12 @@ export default function BuyerRequirementsPage() {
   }, []);
 
   const filteredRequirements = filterItems(requirements, filter);
+  const approvedProperties = properties.filter((p) => p.status === 'verified' || p.status === 'approved');
+  const pendingCount = properties.filter((p) => p.status === 'pending').length;
 
   const openMatchModal = (req) => {
     setSelectedReq(req);
-    setPropertyId(properties[0]?.id?.toString() || '');
+    setPropertyId(approvedProperties[0]?.id?.toString() || '');
     setSellerNote('');
     setSubmitError('');
   };
@@ -54,7 +57,7 @@ export default function BuyerRequirementsPage() {
   const handleSendMatch = async (e) => {
     e.preventDefault();
     if (!propertyId) {
-      setSubmitError('Please select a property to match');
+      setSubmitError('Please select an admin-approved property to match');
       return;
     }
 
@@ -170,12 +173,41 @@ export default function BuyerRequirementsPage() {
                 {submitError && <div className={styles.error}>{submitError}</div>}
 
                 {properties.length === 0 ? (
-                  <p className={styles.itemMeta}>You need to post a property before sending a match.</p>
+                  <div style={{ textAlign: 'center', padding: '14px 0' }}>
+                    <p style={{ fontWeight: '600', color: 'var(--navy)', marginBottom: '8px' }}>
+                      You have not listed any property yet.
+                    </p>
+                    <p className={styles.itemMeta} style={{ marginBottom: '14px' }}>
+                      You need to list a property and have it approved by admin before you can suggest it to buyers.
+                    </p>
+                    <Link href="/dashboard/post-property" className="btn btn-o btn-sm">
+                      + Post a Property
+                    </Link>
+                  </div>
+                ) : approvedProperties.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '14px 0' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
+                    <p style={{ fontWeight: '700', color: 'var(--navy)', fontSize: '15px', marginBottom: '6px' }}>
+                      Awaiting Admin Approval
+                    </p>
+                    <p style={{ fontSize: '13.5px', color: 'var(--mut)', lineHeight: 1.5, marginBottom: '14px' }}>
+                      Your listed {properties.length === 1 ? 'property is' : `${properties.length} properties are`} currently <b>pending review by the admin portal</b>.
+                      A property must first be approved by admin before you can suggest it to buyer requirements.
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <Link href="/dashboard/my-properties" className="btn btn-g btn-sm">
+                        View Listing Status ({pendingCount} pending)
+                      </Link>
+                      <Link href="/dashboard/post-property" className="btn btn-o btn-sm">
+                        Post Another Property
+                      </Link>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div>
                       <label className={styles.fieldLabel} htmlFor="propertyId">
-                        Select your property
+                        Select your approved property <span style={{ color: 'var(--ok)', fontSize: '12px', fontWeight: 600 }}>({approvedProperties.length} available)</span>
                       </label>
                       <select
                         id="propertyId"
@@ -184,9 +216,9 @@ export default function BuyerRequirementsPage() {
                         onChange={(e) => setPropertyId(e.target.value)}
                         required
                       >
-                        {properties.map((p) => (
+                        {approvedProperties.map((p) => (
                           <option key={p.id} value={p.id}>
-                            {p.title} — {p.priceDisplay}
+                            ✓ {p.title} — {p.priceDisplay} (Admin Approved)
                           </option>
                         ))}
                       </select>
@@ -210,13 +242,15 @@ export default function BuyerRequirementsPage() {
                 <button type="button" className={styles.cancelBtn} onClick={closeModal}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={submitting || properties.length === 0}
-                >
-                  {submitting ? 'Sending…' : 'Send Match'}
-                </button>
+                {approvedProperties.length > 0 && (
+                  <button
+                    type="submit"
+                    className={styles.submitBtn}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Sending…' : 'Send Match'}
+                  </button>
+                )}
               </div>
             </form>
           </div>

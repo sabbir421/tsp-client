@@ -1,5 +1,7 @@
-import MatchedPropertiesPage from '../../components/dashboard/MatchedPropertiesPage';
+'use client';
 
-export default function Page() {
-  return <MatchedPropertiesPage />;
+import MatchesPage from '../../matches/page';
+
+export default function MatchedPropertiesDashboardPage() {
+  return <MatchesPage />;
 }

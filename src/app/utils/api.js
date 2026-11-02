@@ -11,6 +11,14 @@ const PUBLIC_PATHS = [
   '/reset-password',
   '/portal-gate',
   '/browse',
+  '/requirements',
+  '/requirement',
+  '/properties',
+  '/property',
+  '/about',
+  '/contact',
+  '/blog',
+  '/how',
 ];
 
 const isPublicPath = (pathname) => {
@@ -163,6 +171,7 @@ export const authApi = {
     request('/auth/reset-password-otp', { method: 'POST', body: JSON.stringify(body) }),
   getProfile: () => request('/auth/profile'),
   updateProfile: (body) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(body) }),
+  updatePassword: (body) => request('/auth/update-password', { method: 'PUT', body: JSON.stringify(body) }),
 };
 
 export const propertyApi = {
@@ -172,10 +181,19 @@ export const propertyApi = {
   getMine: () => request('/properties/mine'),
   getStats: () => request('/properties/mine/stats'),
   getOne: (id) => request(`/properties/${id}`),
-  create: (form, photos) =>
-    uploadRequest('/properties', buildPropertyFormData(form, photos)),
-  update: (id, form, photos, existingPhotos = []) =>
-    uploadRequest(`/properties/${id}`, buildPropertyFormData(form, photos, existingPhotos), 'PUT'),
+  uploadFiles: (formData) => uploadRequest('/properties/upload', formData),
+  create: (formOrFormData, photos) => {
+    if (typeof FormData !== 'undefined' && formOrFormData instanceof FormData) {
+      return uploadRequest('/properties', formOrFormData);
+    }
+    return uploadRequest('/properties', buildPropertyFormData(formOrFormData, photos));
+  },
+  update: (id, formOrFormData, photos, existingPhotos = []) => {
+    if (typeof FormData !== 'undefined' && formOrFormData instanceof FormData) {
+      return uploadRequest(`/properties/${id}`, formOrFormData, 'PUT');
+    }
+    return uploadRequest(`/properties/${id}`, buildPropertyFormData(formOrFormData, photos, existingPhotos), 'PUT');
+  },
   delete: (id) => request(`/properties/${id}`, { method: 'DELETE' }),
 };
 
@@ -194,11 +212,17 @@ export const matchApi = {
   send: (body) => request('/matches', { method: 'POST', body: JSON.stringify(body) }),
   getSellerMatches: () => request('/matches/seller/mine'),
   getSellerSiteVisits: () => request('/matches/seller/site-visits'),
+  confirmSellerVisit: (id) =>
+    request(`/matches/seller/${id}/confirm-visit`, { method: 'PATCH' }),
+  proposeSellerTime: (id, body) =>
+    request(`/matches/seller/${id}/propose-time`, { method: 'PATCH', body: JSON.stringify(body) }),
   completeSellerVisit: (id) =>
     request(`/matches/seller/${id}/complete-visit`, { method: 'PATCH' }),
   getBuyerMatches: () => request('/matches/buyer/mine'),
   getBuyerStats: () => request('/matches/buyer/stats'),
   getBuyerSiteVisits: () => request('/matches/buyer/site-visits'),
+  requestViewing: (id, body) =>
+    request(`/matches/buyer/${id}/viewing-request`, { method: 'POST', body: JSON.stringify(body) }),
   acceptBuyerMatch: (id) => request(`/matches/buyer/${id}/accept`, { method: 'PATCH' }),
   completeBuyerVisit: (id) =>
     request(`/matches/buyer/${id}/complete-visit`, { method: 'PATCH' }),

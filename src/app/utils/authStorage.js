@@ -66,6 +66,8 @@ export function activatePortalSession(role) {
 
   // Keep legacy local keys in sync for this activation, but tab token wins for API
   local.setItem('selectedRole', role);
+  local.setItem('token', session.token);
+  local.setItem('user', JSON.stringify(session.user));
   return true;
 }
 
