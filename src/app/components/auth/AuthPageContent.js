@@ -8,7 +8,7 @@ import { setSessionRole } from '../../utils/prototypeStore';
 import { authApi } from '../../utils/api';
 import { setAuth } from '../../store/slices/authSlice';
 import { getSafeNextPath } from '../../utils/navigation';
-import { ADMIN_LOGIN_URL, USER_ROLES } from '../../constants';
+import { USER_ROLES } from '../../constants';
 
 const RESEND_INTERVAL = 60;
 const SELLER_SIDE_ROLES = ['owner', 'rentgiver', 'agent', 'company', 'seller', USER_ROLES.SELLER_AGENT];
@@ -683,15 +683,6 @@ export default function AuthPageContent({ initialTab = 'login' }) {
                 >
                   Create an account
                 </button>
-              </p>
-
-              <p className="alt tsx-admin-link">
-                <a
-                  href={ADMIN_LOGIN_URL}
-                  style={{ color: 'var(--navy)', fontWeight: '600', textDecoration: 'underline' }}
-                >
-                  TrueSpace team: admin sign-in →
-                </a>
               </p>
 
               <p className="fine" style={{ marginTop: '16px' }}>
