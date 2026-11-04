@@ -3,12 +3,16 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { getStore, setSessionRole, clearSession, subscribeStore } from '../../utils/prototypeStore';
+import { useDispatch } from 'react-redux';
+import { getStore, clearSession, subscribeStore } from '../../utils/prototypeStore';
+import { getActiveToken } from '../../utils/authStorage';
+import { logoutAllPortals } from '../../store/slices/authSlice';
 import { ROLES } from '../../utils/prototypeData';
 
 export default function PrototypeHeader() {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
   const [session, setSession] = useState({ role: null, name: '', email: '', isLoggedIn: false });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
@@ -17,7 +21,9 @@ export default function PrototypeHeader() {
   useEffect(() => {
     const update = () => {
       const { v3 } = getStore();
-      if (v3?.session) setSession(v3.session);
+      if (v3?.session) {
+        setSession({ ...v3.session, isLoggedIn: !!v3.session.isLoggedIn && !!getActiveToken() });
+      }
     };
     update();
     return subscribeStore(update);
@@ -37,30 +43,16 @@ export default function PrototypeHeader() {
     };
   }, [roleMenuOpen]);
 
-  const handleRoleSwitch = (role) => {
-    setSessionRole(role);
-    setRoleMenuOpen(false);
-    if (role === 'admin') {
-      router.push('/dashboard?role=admin');
-    } else {
-      router.push(`/dashboard?role=${role}`);
-    }
-  };
-
   const handleLogout = () => {
     clearSession();
+    dispatch(logoutAllPortals());
     setRoleMenuOpen(false);
     router.push('/');
   };
 
   const isDashboard = pathname?.startsWith('/dashboard');
   const isLoggedIn = !!session?.isLoggedIn;
-  const isClientRole = session?.role === 'buyer' || session?.identity === 'buyer' || session?.identity === 'tenant';
-  const dashboardHref = session?.role === 'admin' 
-    ? '/dashboard?role=admin' 
-    : isClientRole 
-      ? '/dashboard?role=buyer' 
-      : '/dashboard?role=owner';
+  const dashboardHref = '/dashboard';
   const ctaLabel = 'My dashboard';
 
   return (

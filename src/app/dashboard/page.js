@@ -23,13 +23,17 @@ import { authApi, propertyApi, matchApi, requirementApi, getUploadUrl } from '..
 import {
   getStore,
   saveStore,
-  setSessionRole,
   toggleSaveProperty,
   setMatchDecision,
   setVisitStatus,
   subscribeStore,
   resetStore,
+  clearSession,
 } from '../utils/prototypeStore';
+import { useDispatch } from 'react-redux';
+import { logoutAllPortals } from '../store/slices/authSlice';
+import { useAuthUser } from '../components/auth/RequireAuth';
+import { USER_ROLES } from '../constants';
 
 const ICONS = {
   grid: (
@@ -97,15 +101,11 @@ const ICONS = {
 function DashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  const queryRole = searchParams.get('role');
-  const normalizedRole = (queryRole === 'tenant' || queryRole === 'buyer' || queryRole === 'buyer_tenant')
-    ? 'buyer'
-    : (queryRole === 'rentgiver' || queryRole === 'owner' || queryRole === 'agent' || queryRole === 'company' || queryRole === 'seller_agent')
-      ? 'owner'
-      : (queryRole === 'admin' ? 'admin' : null);
-
-  const [role, setRole] = useState(normalizedRole || 'owner');
+  // The portal comes from the verified session, never from the URL
+  const authUser = useAuthUser();
+  const role = authUser?.role === USER_ROLES.BUYER_TENANT ? 'buyer' : 'owner';
   const [tab, setTab] = useState(searchParams.get('tab') || 'overview');
   
   const blankStore = {
@@ -121,12 +121,6 @@ function DashboardContent() {
   const handleResetData = () => {
     resetStore();
     showToast('Data reset successfully');
-  };
-
-  const handleSwitchRole = () => {
-    const nextRole = role === 'owner' ? 'buyer' : role === 'buyer' ? 'admin' : 'owner';
-    handleRoleChange(nextRole);
-    showToast(`Switched to ${nextRole === 'owner' ? 'Seller / Rent Giver' : nextRole === 'buyer' ? 'Buyer / Tenant' : 'Admin'} view`);
   };
 
   // Prototype v39 additional dashboard states
@@ -163,20 +157,12 @@ function DashboardContent() {
   const [dbBuyerVisits, setDbBuyerVisits] = useState([]);
 
   useEffect(() => {
-    if (!queryRole) {
-      try {
-        const stored = localStorage.getItem('user');
-        if (stored) {
-          const u = JSON.parse(stored);
-          if (u.role === 'buyer_tenant' || u.role === 'buyer') {
-            setRole('buyer');
-          } else if (u.role === 'seller_agent' || u.role === 'owner') {
-            setRole('owner');
-          }
-        }
-      } catch (_) {}
-    }
-  }, [queryRole]);
+    if (!searchParams.has('role')) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('role');
+    const query = params.toString();
+    router.replace(query ? `/dashboard?${query}` : '/dashboard');
+  }, [searchParams, router]);
 
   useEffect(() => {
     let mounted = true;
@@ -297,20 +283,6 @@ function DashboardContent() {
     update();
     return subscribeStore(update);
   }, []);
-
-  useEffect(() => {
-    const r = searchParams.get('role');
-    if (r && ['buyer', 'owner', 'admin'].includes(r)) {
-      setRole(r);
-    }
-  }, [searchParams]);
-
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
-    setTab('overview');
-    setSessionRole(newRole);
-    router.push(`/dashboard?role=${newRole}`);
-  };
 
   // Buyer data (strictly from DB)
   const buyerReqs = useMemo(() => {
@@ -730,30 +702,17 @@ function DashboardContent() {
             </>
           )}
 
-          {/* ADMIN SHORTCUT */}
-          {role === 'admin' && (
-            <div style={{ padding: '10px 4px' }}>
-              <p style={{ fontSize: '13px', color: 'var(--mut)', margin: '0 0 12px' }}>
-                You are in Administrator mode.
-              </p>
-              <a
-                href="http://localhost:3002"
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-n btn-sm"
-                style={{ width: '100%', marginBottom: '8px' }}
-              >
-                Launch Admin Portal ↗
-              </a>
-              <Link href="/dashboard?role=owner" className="btn btn-g btn-sm" style={{ width: '100%' }}>
-                Return to Owner view
-              </Link>
-            </div>
-          )}
 
           {/* SHARED SIDEBAR ACTIONS (EXACT TO PROTOTYPE V39) */}
           <div className="dsep"></div>
-          <button type="button" onClick={() => router.push('/login')}>
+          <button
+            type="button"
+            onClick={() => {
+              clearSession();
+              dispatch(logoutAllPortals());
+              router.push('/login');
+            }}
+          >
             {ICONS.out}
             <span>Log out</span>
           </button>
@@ -2982,139 +2941,6 @@ function DashboardContent() {
             </>
           )}
 
-          {/* ================= ADMIN VIEW SHORTCUT ================= */}
-          {role === 'admin' && (
-            <div className="space-y-6">
-              <div className="dhead">
-                <div>
-                  <h3 style={{ margin: '0 0 4px', color: 'var(--navy)' }}>Overview</h3>
-                  <small style={{ color: 'var(--mut)' }}>Dhaka City</small>
-                </div>
-                <a
-                  href="http://localhost:3002"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-o btn-sm"
-                >
-                  Open Full Admin SPA (Port 3002) ↗
-                </a>
-              </div>
-
-              {/* 6 KPIs matching TSP.html */}
-              <div className="kpis" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-                <div className="kpi">
-                  <b>1,284</b>
-                  <span>Registered users</span>
-                  <em style={{ display: 'block', fontStyle: 'normal', fontSize: '12px', color: 'var(--ok)', marginTop: '4px' }}>+86 this month</em>
-                </div>
-                <div className="kpi">
-                  <b>212</b>
-                  <span>Live listings</span>
-                  <em style={{ display: 'block', fontStyle: 'normal', fontSize: '12px', color: 'var(--mut)', marginTop: '4px' }}>Across Dhaka City</em>
-                </div>
-                <div className="kpi">
-                  <b>4</b>
-                  <span>Listings awaiting approval</span>
-                </div>
-                <div className="kpi">
-                  <b>3</b>
-                  <span>User verification requests</span>
-                  <em style={{ display: 'block', fontStyle: 'normal', fontSize: '12px', color: 'var(--orange2)', marginTop: '4px' }}>Pending · in Users</em>
-                </div>
-                <div className="kpi">
-                  <b>384</b>
-                  <span>Matches in October</span>
-                  <em style={{ display: 'block', fontStyle: 'normal', fontSize: '12px', color: 'var(--ok)', marginTop: '4px' }}>+16% vs September</em>
-                </div>
-                <div className="kpi">
-                  <b>2</b>
-                  <span>Open reports</span>
-                </div>
-              </div>
-
-              {/* Grid 2: Charts and Sector Bars */}
-              <div className="agrid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '18px', marginTop: '18px' }}>
-                <div className="list">
-                  <h4 style={{ margin: 0, padding: '14px 18px', borderBottom: '1px solid var(--line)', color: 'var(--navy)' }}>
-                    <span>Matches made per month</span>
-                  </h4>
-                  <div className="chart" style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '190px', padding: '18px 18px 0' }}>
-                    {[
-                      { m: 'May', val: 180 },
-                      { m: 'Jun', val: 240 },
-                      { m: 'Jul', val: 290 },
-                      { m: 'Aug', val: 310 },
-                      { m: 'Sep', val: 330 },
-                      { m: 'Oct', val: 384 },
-                    ].map((item, idx) => (
-                      <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', fontSize: '12px', color: 'var(--mut)' }}>
-                        <b style={{ fontSize: '12px', color: 'var(--navy)', marginBottom: '4px' }}>{item.val}</b>
-                        <i style={{ display: 'block', width: '100%', maxWidth: '46px', height: `${Math.round((item.val / 384) * 120)}px`, borderRadius: '8px 8px 0 0', background: 'linear-gradient(180deg, var(--orange), #f7b75e)' }}></i>
-                        <span style={{ padding: '6px 0 10px' }}>{item.m}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="list">
-                  <h4 style={{ margin: 0, padding: '14px 18px', borderBottom: '1px solid var(--line)', color: 'var(--navy)' }}>
-                    <span>Listings by neighbourhood</span>
-                  </h4>
-                  <div style={{ padding: '8px 0' }}>
-                    {[
-                      ['Uttara', 38],
-                      ['Gulshan', 31],
-                      ['Bashundhara R/A', 27],
-                      ['Mirpur', 24],
-                      ['Dhanmondi', 19],
-                      ['Mohammadpur', 14],
-                    ].map(([area, count]) => (
-                      <div key={area} className="hbar" style={{ display: 'grid', gridTemplateColumns: '110px 1fr 30px', gap: '10px', alignItems: 'center', padding: '7px 18px', fontSize: '13px' }}>
-                        <span>{area}</span>
-                        <i style={{ display: 'block', height: '10px', borderRadius: '99px', background: 'var(--navy2)', width: `${(count / 38) * 100}%` }}></i>
-                        <b>{count}</b>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Grid 2: Needs attention & Recent activity */}
-              <div className="agrid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '18px', marginTop: '18px' }}>
-                <div className="list">
-                  <h4 style={{ margin: 0, padding: '14px 18px', borderBottom: '1px solid var(--line)', color: 'var(--navy)' }}>Needs attention</h4>
-                  <div className="li">
-                    <div className="grow"><b>4</b> listings waiting for approval</div>
-                    <a href="http://localhost:3002/properties" target="_blank" rel="noreferrer" className="btn btn-g btn-sm">Review</a>
-                  </div>
-                  <div className="li">
-                    <div className="grow"><b>3</b> user verification requests pending (Users)</div>
-                    <a href="http://localhost:3002/users" target="_blank" rel="noreferrer" className="btn btn-g btn-sm">Review</a>
-                  </div>
-                  <div className="li">
-                    <div className="grow"><b>2</b> open reports</div>
-                    <a href="http://localhost:3002/reports" target="_blank" rel="noreferrer" className="btn btn-g btn-sm">Review</a>
-                  </div>
-                </div>
-
-                <div className="list">
-                  <h4 style={{ margin: 0, padding: '14px 18px', borderBottom: '1px solid var(--line)', color: 'var(--navy)' }}>Recent activity</h4>
-                  {[
-                    ['New Buyer / Tenant sign-up: Arif Hossain', '12 min ago'],
-                    ['Listing TSP-1005 submitted for approval', '1 h ago'],
-                    ['Match MR-4502 accepted by both sides', '3 h ago'],
-                    ['Report R-88 filed on TSP-1008', '5 h ago'],
-                    ['Article published: Uttara sector guide for families', '14 Oct'],
-                  ].map(([act, time], i) => (
-                    <div key={i} className="li">
-                      <div className="grow">{act}</div>
-                      <small style={{ color: 'var(--mut)' }}>{time}</small>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </main>
       </div>
 

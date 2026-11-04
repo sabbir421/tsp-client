@@ -8,8 +8,10 @@ import PrototypeFooter from '../components/prototype/PrototypeFooter';
 import Toast, { showToast } from '../components/prototype/Toast';
 import { DHAKA_ZONES, matchesFor, PROPS } from '../utils/prototypeData';
 import { requirementApi } from '../utils/api';
+import RequireAuth from '../components/auth/RequireAuth';
+import { USER_ROLES } from '../constants';
 
-export default function PostRequirementPage() {
+function PostRequirementContent() {
   const router = useRouter();
 
   const [purpose, setPurpose] = useState('Sale');
@@ -332,5 +334,13 @@ export default function PostRequirementPage() {
 
       <PrototypeFooter />
     </>
+  );
+}
+
+export default function PostRequirementPage() {
+  return (
+    <RequireAuth requiredRole={USER_ROLES.BUYER_TENANT}>
+      <PostRequirementContent />
+    </RequireAuth>
   );
 }

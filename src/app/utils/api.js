@@ -1,7 +1,11 @@
 import { clearPortalSession, getActivePortalRole, getActiveToken } from './authStorage';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.truespaceproperty.com/api';
-export const UPLOAD_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.truespaceproperty.com/api').replace(/\/api$/, '');
+const DEFAULT_API_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8000/api'
+    : 'https://api.truespaceproperty.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+export const UPLOAD_BASE_URL = API_URL.replace(/\/api$/, '');
 
 const PUBLIC_PATHS = [
   '/login',
@@ -12,7 +16,6 @@ const PUBLIC_PATHS = [
   '/portal-gate',
   '/browse',
   '/requirements',
-  '/requirement',
   '/properties',
   '/property',
   '/about',
@@ -58,6 +61,16 @@ const handleUnauthorized = (endpoint, hadToken) => {
   }
 };
 
+const apiError = (message, status) => Object.assign(new Error(message), { status });
+
+const sendRequest = async (url, config) => {
+  try {
+    return await fetch(url, config);
+  } catch {
+    throw apiError('Cannot reach the server. Please check your connection and try again.', 0);
+  }
+};
+
 const request = async (endpoint, options = {}) => {
   const token = typeof window !== 'undefined' ? getActiveToken() : null;
 
@@ -70,7 +83,7 @@ const request = async (endpoint, options = {}) => {
     ...options,
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, config);
+  const response = await sendRequest(`${API_URL}${endpoint}`, config);
 
   let data = {};
   try {
@@ -81,12 +94,12 @@ const request = async (endpoint, options = {}) => {
 
   if (response.status === 401) {
     handleUnauthorized(endpoint, !!token);
-    throw new Error(data.message || 'Session expired. Please log in again.');
+    throw apiError(data.message || 'Session expired. Please log in again.', 401);
   }
 
   if (!response.ok) {
     const detail = data.errors?.[0]?.msg;
-    throw new Error(detail || data.message || 'Request failed');
+    throw apiError(detail || data.message || 'Request failed', response.status);
   }
 
   return data;
@@ -95,7 +108,7 @@ const request = async (endpoint, options = {}) => {
 const uploadRequest = async (endpoint, formData, method = 'POST') => {
   const token = typeof window !== 'undefined' ? getActiveToken() : null;
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await sendRequest(`${API_URL}${endpoint}`, {
     method,
     headers: {
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -112,11 +125,11 @@ const uploadRequest = async (endpoint, formData, method = 'POST') => {
 
   if (response.status === 401) {
     handleUnauthorized(endpoint, !!token);
-    throw new Error(data.message || 'Session expired. Please log in again.');
+    throw apiError(data.message || 'Session expired. Please log in again.', 401);
   }
 
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+    throw apiError(data.message || 'Request failed', response.status);
   }
 
   return data;

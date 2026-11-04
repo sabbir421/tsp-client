@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ADMIN_LOGIN_URL } from '../../constants';
 
 export default function PrototypeFooter() {
   return (
@@ -29,7 +30,7 @@ export default function PrototypeFooter() {
             <h5>Portals</h5>
             <Link href="/dashboard?role=buyer">Buyer / Tenant Portal</Link>
             <Link href="/dashboard?role=owner">Seller / Owner Portal</Link>
-            <Link href="/dashboard?role=admin">Admin Panel</Link>
+            <a href={ADMIN_LOGIN_URL}>Admin Panel</a>
             <Link href="/role-select">Account Type Selection</Link>
             <Link href="/login">Account Log in</Link>
           </div>

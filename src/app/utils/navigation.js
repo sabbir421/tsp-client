@@ -6,6 +6,7 @@ export function getSafeNextPath(value, fallback = '/dashboard') {
     typeof value !== 'string' ||
     !value.startsWith('/') ||
     value.startsWith('//') ||
+    value.startsWith('/\\') ||
     value.startsWith('/role-select') ||
     value.startsWith('/login') ||
     value.startsWith('/signup') ||

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import PrototypeHeader from '../components/prototype/PrototypeHeader';
 import PrototypeFooter from '../components/prototype/PrototypeFooter';
 import ListPropertyWizard from '../components/dashboard/ListPropertyWizard';
+import RequireAuth from '../components/auth/RequireAuth';
+import { USER_ROLES } from '../constants';
 
 export default function ListPropertyPage() {
   return (
@@ -23,7 +25,9 @@ export default function ListPropertyPage() {
         </div>
       </div>
 
-      <ListPropertyWizard />
+      <RequireAuth requiredRole={USER_ROLES.SELLER_AGENT}>
+        <ListPropertyWizard />
+      </RequireAuth>
 
       <PrototypeFooter />
     </>

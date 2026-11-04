@@ -1,3 +1,7 @@
+export const ADMIN_LOGIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL
+  ? `${process.env.NEXT_PUBLIC_ADMIN_URL.replace(/\/$/, '')}/login`
+  : 'http://localhost:3002/login';
+
 export const USER_ROLES = {
   BUYER_TENANT: 'buyer_tenant',
   SELLER_AGENT: 'seller_agent',

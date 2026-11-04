@@ -6,10 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { setSessionRole } from '../../utils/prototypeStore';
 import { authApi } from '../../utils/api';
-import { activatePortalSession, savePortalSession } from '../../utils/authStorage';
-import { USER_ROLES } from '../../constants';
+import { setAuth } from '../../store/slices/authSlice';
+import { getSafeNextPath } from '../../utils/navigation';
+import { ADMIN_LOGIN_URL, USER_ROLES } from '../../constants';
 
 const RESEND_INTERVAL = 60;
+const SELLER_SIDE_ROLES = ['owner', 'rentgiver', 'agent', 'company', 'seller', USER_ROLES.SELLER_AGENT];
+const IDENTITY_IDS = ['buyer', 'tenant', 'rentgiver', 'owner', 'agent', 'company'];
 
 export default function AuthPageContent({ initialTab = 'login' }) {
   const router = useRouter();
@@ -18,10 +21,12 @@ export default function AuthPageContent({ initialTab = 'login' }) {
 
   const queryTab = searchParams.get('tab');
   const [tab, setTab] = useState(queryTab === 'signup' ? 'signup' : initialTab);
+  const queryRole = searchParams.get('role');
+  const returnUrl = getSafeNextPath(searchParams.get('returnUrl') || searchParams.get('next'), '');
 
   // Login states
   // accountType: 'buyer' (Client Portal) or 'owner' (Seller Portal)
-  const [loginAccountType, setLoginAccountType] = useState('buyer');
+  const [loginAccountType, setLoginAccountType] = useState(SELLER_SIDE_ROLES.includes(queryRole) ? 'owner' : 'buyer');
   const [loginPhone, setLoginPhone] = useState('');
   const [loginRemember, setLoginRemember] = useState(true);
   const [loginOtpStep, setLoginOtpStep] = useState(1);
@@ -33,7 +38,10 @@ export default function AuthPageContent({ initialTab = 'login' }) {
 
   // Signup states
   // identity options: 'buyer', 'tenant', 'rentgiver', 'owner', 'agent', 'company' (NO 'seller')
-  const [suIdentity, setSuIdentity] = useState('buyer');
+  const [suIdentity, setSuIdentity] = useState(() => {
+    if (IDENTITY_IDS.includes(queryRole)) return queryRole;
+    return SELLER_SIDE_ROLES.includes(queryRole) ? 'owner' : 'buyer';
+  });
   const [suFullName, setSuFullName] = useState('');
   const [suCompany, setSuCompany] = useState('');
   const [suPhone, setSuPhone] = useState('');
@@ -72,7 +80,11 @@ export default function AuthPageContent({ initialTab = 'login' }) {
     setSuSuccess('');
     // Optionally reflect in URL without full refresh
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', newTab === 'signup' ? '/signup' : '/login');
+      const params = new URLSearchParams(window.location.search);
+      params.delete('tab');
+      const query = params.toString();
+      const path = newTab === 'signup' ? '/signup' : '/login';
+      window.history.replaceState(null, '', query ? `${path}?${query}` : path);
     }
   };
 
@@ -102,7 +114,7 @@ export default function AuthPageContent({ initialTab = 'login' }) {
           setLoginAccountType('buyer');
         }
       }
-      setLoginSuccess(`OTP has been sent to ${trimmed}.`);
+      setLoginSuccess('OTP has been sent to your registered mobile number.');
       setLoginOtpStep(2);
       setLoginTimer(RESEND_INTERVAL);
     } catch (err) {
@@ -149,7 +161,6 @@ export default function AuthPageContent({ initialTab = 'login' }) {
     // Determine effective role: server user role wins if available
     const isSeller = authUser?.role === USER_ROLES.SELLER_AGENT || (!authUser && loginAccountType === 'owner');
     const sessionRole = isSeller ? 'owner' : 'buyer';
-    const effectiveBackendRole = isSeller ? USER_ROLES.SELLER_AGENT : USER_ROLES.BUYER_TENANT;
     const userName = authUser?.fullName || authUser?.name || (sessionRole === 'buyer' ? 'Buyer User' : 'Seller User');
     const userEmail = authUser?.email || '';
 
@@ -161,21 +172,15 @@ export default function AuthPageContent({ initialTab = 'login' }) {
       isLoggedIn: true,
     });
 
-    if (authToken && authUser) {
-      savePortalSession(effectiveBackendRole, { token: authToken, user: authUser });
-      activatePortalSession(effectiveBackendRole);
+    if (!authToken || !authUser) {
+      setLoginError('Login failed. Please try again.');
+      setLoginLoading(false);
+      return;
     }
+    dispatch(setAuth({ token: authToken, user: authUser }));
 
-    // Redirection based on role or returnUrl
     setLoginLoading(false);
-    const returnUrl = searchParams.get('returnUrl');
-    if (returnUrl) {
-      router.push(returnUrl);
-    } else if (!isSeller) {
-      router.push('/dashboard?role=buyer');
-    } else {
-      router.push('/dashboard?role=owner');
-    }
+    router.push(returnUrl || '/dashboard');
   };
 
   /* ------------------- SIGNUP FLOW ------------------- */
@@ -213,13 +218,12 @@ export default function AuthPageContent({ initialTab = 'login' }) {
         role: backendRole,
       });
       setSuSuccess(`OTP has been sent to ${suPhone.trim()}.`);
-    } catch (err) {
-      console.log('Demo registration OTP fallback:', err.message);
-      setSuSuccess(`OTP has been sent to ${suPhone.trim()}.`);
-    } finally {
-      setSuLoading(false);
       setSuOtpStep(2);
       setSuTimer(RESEND_INTERVAL);
+    } catch (err) {
+      setSuError(err.message || 'Failed to send OTP');
+    } finally {
+      setSuLoading(false);
     }
   };
 
@@ -254,7 +258,15 @@ export default function AuthPageContent({ initialTab = 'login' }) {
         authToken = res.data.token;
       }
     } catch (err) {
-      console.log('Backend registration fallback:', err.message);
+      setSuError(err.message || 'Registration failed');
+      setSuLoading(false);
+      return;
+    }
+
+    if (!authToken || !authUser) {
+      setSuError('Registration failed. Please try again.');
+      setSuLoading(false);
+      return;
     }
 
     // Determine target portal:
@@ -271,20 +283,10 @@ export default function AuthPageContent({ initialTab = 'login' }) {
       isLoggedIn: true,
     });
 
-    if (authToken && authUser) {
-      savePortalSession(backendRole, { token: authToken, user: authUser });
-      activatePortalSession(backendRole);
-    }
+    dispatch(setAuth({ token: authToken, user: authUser }));
 
     setSuLoading(false);
-    const returnUrl = searchParams.get('returnUrl');
-    if (returnUrl) {
-      router.push(returnUrl);
-    } else if (isBuyerSide) {
-      router.push('/dashboard?role=buyer');
-    } else {
-      router.push('/dashboard?role=owner');
-    }
+    router.push(returnUrl || '/dashboard');
   };
 
   // Identities for Create Account (SELLER EXCLUDED as instructed: "seller role ta dorkar nai")
@@ -356,6 +358,9 @@ export default function AuthPageContent({ initialTab = 'login' }) {
       portal: 'seller',
     },
   ];
+
+  const selectedIdentity = identities.find((item) => item.id === suIdentity) || identities[0];
+  const signupPortalLabel = selectedIdentity.portal === 'client' ? 'Buyer / Tenant portal' : 'Seller / Rent Giver portal';
 
   return (
     <div style={{ backgroundColor: '#f4f6fb', minHeight: 'calc(100vh - 68px)', padding: '36px 16px 56px' }}>
@@ -433,12 +438,14 @@ export default function AuthPageContent({ initialTab = 'login' }) {
         {/* RIGHT CARD */}
         <section className="acard">
           <div className="eyebrow">TRUESPACE ACCOUNT</div>
-          <h1 style={{ marginBottom: '14px' }}>Login / Create Account</h1>
+          <h1 style={{ marginBottom: '14px' }}>{tab === 'login' ? 'Welcome back' : 'Join TrueSpace'}</h1>
 
           {/* TWO-TAB TOGGLE (.jsw) */}
           <div className="jsw" role="tablist">
             <button
               type="button"
+              role="tab"
+              aria-selected={tab === 'login'}
               className={tab === 'login' ? 'on' : ''}
               onClick={() => handleSwitchTab('login')}
             >
@@ -446,6 +453,8 @@ export default function AuthPageContent({ initialTab = 'login' }) {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={tab === 'signup'}
               className={tab === 'signup' ? 'on' : ''}
               onClick={() => handleSwitchTab('signup')}
             >
@@ -609,7 +618,7 @@ export default function AuthPageContent({ initialTab = 'login' }) {
                 /* Login Step 2: 6-Digit OTP Verification */
                 <form onSubmit={handleVerifyLoginOtp} noValidate>
                   <div className="note" style={{ marginBottom: '16px', backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '8px', fontSize: '13.5px', border: '1px solid var(--line)' }}>
-                    A 6-digit verification code was sent to <b>{loginPhone}</b>
+                    A 6-digit verification code was sent to the mobile number registered for <b>{loginPhone}</b>
                   </div>
 
                   <div className="frow one" style={{ marginBottom: '14px' }}>
@@ -677,12 +686,12 @@ export default function AuthPageContent({ initialTab = 'login' }) {
               </p>
 
               <p className="alt tsx-admin-link">
-                <Link
-                  href="/dashboard?role=admin"
+                <a
+                  href={ADMIN_LOGIN_URL}
                   style={{ color: 'var(--navy)', fontWeight: '600', textDecoration: 'underline' }}
                 >
                   TrueSpace team: admin sign-in →
-                </Link>
+                </a>
               </p>
 
               <p className="fine" style={{ marginTop: '16px' }}>
@@ -695,10 +704,10 @@ export default function AuthPageContent({ initialTab = 'login' }) {
           {tab === 'signup' && (
             <div>
               <h2 style={{ fontSize: '20px', color: 'var(--navy)', margin: '0 0 4px', fontWeight: '700' }}>
-                Create your account
+                Who are you registering as?
               </h2>
               <p className="sub" style={{ marginBottom: '16px' }}>
-                Choose your identity (required): It shows on your profile. Admin accounts can&apos;t be created here.
+                Choose one (required). It shows on your profile and decides which portal you get.
               </p>
 
               {/* 6 Identity Selection Cards Grid (Seller is omitted!) */}
@@ -749,6 +758,12 @@ export default function AuthPageContent({ initialTab = 'login' }) {
                     </button>
                   );
                 })}
+              </div>
+
+              <div className="regrole" aria-live="polite">
+                <span>Registering as</span>
+                <b>{selectedIdentity.title}</b>
+                <small>{signupPortalLabel}</small>
               </div>
 
               {suError && (
@@ -838,7 +853,7 @@ export default function AuthPageContent({ initialTab = 'login' }) {
                     disabled={suLoading}
                     style={{ width: '100%', height: '46px', fontSize: '15px', fontWeight: '700' }}
                   >
-                    {suLoading ? 'Sending OTP...' : 'Create account'}
+                    {suLoading ? 'Sending OTP...' : `Register as ${selectedIdentity.title}`}
                   </button>
                 </form>
               ) : (
@@ -870,7 +885,7 @@ export default function AuthPageContent({ initialTab = 'login' }) {
                     disabled={suLoading}
                     style={{ width: '100%', height: '46px', fontSize: '15px', fontWeight: '700', marginBottom: '10px' }}
                   >
-                    {suLoading ? 'Creating Account...' : 'Verify & Complete Registration'}
+                    {suLoading ? 'Creating Account...' : `Verify & Register as ${selectedIdentity.title}`}
                   </button>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
