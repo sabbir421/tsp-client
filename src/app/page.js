@@ -79,10 +79,6 @@ export default function HomePage() {
       <section className="hero">
         <div className="wrap heroGrid">
           <div>
-            <span className="pill">
-              <span className="dot"></span>
-              Now open across Dhaka City · 0% commission pilot
-            </span>
             <h1>
               Tell us what you need.<br />
               <em>We bring the right home to you</em>, privately.
