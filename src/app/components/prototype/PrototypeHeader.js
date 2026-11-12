@@ -9,6 +9,16 @@ import { getActiveToken } from '../../utils/authStorage';
 import { logoutAllPortals } from '../../store/slices/authSlice';
 import { ROLES } from '../../utils/prototypeData';
 
+const MOBILE_LINKS = [
+  ['/', 'Home'],
+  ['/discover', 'Discover properties'],
+  ['/requirements', 'Buyer requirements'],
+  ['/matches', 'Matches'],
+  ['/how', 'How it works'],
+  ['/about', 'About'],
+  ['/contact', 'Contact'],
+];
+
 export default function PrototypeHeader() {
   const pathname = usePathname();
   const router = useRouter();
@@ -43,6 +53,32 @@ export default function PrototypeHeader() {
     };
   }, [roleMenuOpen]);
 
+  const closeMenu = () => setMobileOpen(false);
+
+  // Close the drawer when the route changes (including back/forward)
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setMobileOpen(false);
+  }
+
+  // While the drawer is open: lock page scroll, close on Escape, close if the screen grows to desktop
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => e.key === 'Escape' && setMobileOpen(false);
+    const desktop = window.matchMedia('(min-width: 1021px)');
+    const onResize = (e) => e.matches && setMobileOpen(false);
+    window.addEventListener('keydown', onKey);
+    desktop.addEventListener('change', onResize);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+      desktop.removeEventListener('change', onResize);
+    };
+  }, [mobileOpen]);
+
   const handleLogout = () => {
     clearSession();
     dispatch(logoutAllPortals());
@@ -74,6 +110,14 @@ export default function PrototypeHeader() {
               className="lg-mark"
               width={48}
               height={48}
+            />
+            <img
+              src="/logo-prototype.webp"
+              alt=""
+              aria-hidden="true"
+              className="lg-mob"
+              width={153}
+              height={56}
             />
           </Link>
 
@@ -204,82 +248,93 @@ export default function PrototypeHeader() {
               type="button"
               className="burger"
               id="burger"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Menu"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mnav"
             >
-              <svg width="26" height="26" viewBox="0 0 24 24">
+              <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3 6h18M3 12h18M3 18h18" stroke="#1c2847" strokeWidth="2.2" strokeLinecap="round" />
               </svg>
             </button>
           </div>
         </div>
+      </header>
 
-        {mobileOpen && (
-          <div className="mnav open" id="mnav">
-            <Link href="/" onClick={() => setMobileOpen(false)}>
-              Home
-            </Link>
-            <Link href="/discover" onClick={() => setMobileOpen(false)}>
-              Discover properties
-            </Link>
-            <Link href="/requirements" onClick={() => setMobileOpen(false)}>
-              Buyer requirements
-            </Link>
-            <Link href="/matches" onClick={() => setMobileOpen(false)}>
-              Matches
-            </Link>
-            <Link href="/how" onClick={() => setMobileOpen(false)}>
-              How it works
-            </Link>
-            <Link href="/about" onClick={() => setMobileOpen(false)}>
-              About
-            </Link>
-            <Link href="/contact" onClick={() => setMobileOpen(false)}>
-              Contact
-            </Link>
-            {isLoggedIn ? (
-              <>
-                <Link
-                  href={dashboardHref}
-                  className="btn btn-n"
-                  style={{ marginTop: '12px' }}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {ctaLabel} · {ROLES[session?.role]?.label || 'Buyer'}
-                </Link>
-                <button
-                  type="button"
-                  style={{ display: 'block', width: '100%', padding: '11px 4px', fontSize: '13px', color: '#dc2626', textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onClick={() => {
-                    setMobileOpen(false);
-                    handleLogout();
-                  }}
-                >
-                  Sign out ({session.name || 'User'})
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="btn btn-n"
-                  style={{ marginTop: '12px', backgroundColor: '#1c2847', color: '#fff' }}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/signup"
-                  style={{ display: 'block', padding: '11px 4px', fontSize: '13px', color: 'var(--navy)', textAlign: 'center', fontWeight: '600' }}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Create an account
-                </Link>
-              </>
-            )}
+      {/* Mobile / tablet drawer: always mounted so it can slide in and out */}
+      <div className={`mdrawer-bg ${mobileOpen ? 'open' : ''}`} onClick={closeMenu} aria-hidden="true" />
+      <nav
+        id="mnav"
+        className={`mdrawer ${mobileOpen ? 'open' : ''}`}
+        aria-label="Main menu"
+        aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
+      >
+        <div className="mdrawer-head">
+          <Link href="/" className="mdrawer-logo" onClick={closeMenu} aria-label="TrueSpace Property home">
+            <img src="/logo-prototype.webp" alt="TrueSpace Property" width={132} height={48} />
+          </Link>
+          <button type="button" className="mdrawer-x" onClick={closeMenu} aria-label="Close menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        {isLoggedIn && (
+          <div className="mdrawer-user">
+            <div className="av">{session?.name ? session.name[0] : 'U'}</div>
+            <div>
+              <b>{session.name || 'User'}</b>
+              <small>{ROLES[session?.role]?.label || 'Member'}</small>
+            </div>
           </div>
         )}
-      </header>
+
+        <div className="mdrawer-links">
+          {MOBILE_LINKS.map(([href, label]) => (
+            <Link
+              key={href}
+              href={href}
+              className={pathname === href ? 'on' : ''}
+              aria-current={pathname === href ? 'page' : undefined}
+              onClick={closeMenu}
+            >
+              {label}
+              <span aria-hidden="true">›</span>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mdrawer-foot">
+          {isLoggedIn ? (
+            <>
+              <Link href={dashboardHref} className="btn btn-n" onClick={closeMenu}>
+                {ctaLabel} · {ROLES[session?.role]?.label || 'Buyer'}
+              </Link>
+              <button
+                type="button"
+                className="mdrawer-out"
+                onClick={() => {
+                  closeMenu();
+                  handleLogout();
+                }}
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="btn btn-n" onClick={closeMenu}>
+                Log in
+              </Link>
+              <Link href="/signup" className="btn btn-g" onClick={closeMenu}>
+                Create an account
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
     </>
   );
 }

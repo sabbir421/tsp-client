@@ -107,6 +107,15 @@ function DashboardContent() {
   const authUser = useAuthUser();
   const role = authUser?.role === USER_ROLES.BUYER_TENANT ? 'buyer' : 'owner';
   const [tab, setTab] = useState(searchParams.get('tab') || 'overview');
+
+  // On phones the tab list is a horizontal strip: keep the active tab in view
+  useEffect(() => {
+    const active = document.querySelector('.dnav button.on');
+    const nav = active?.closest('.dnav');
+    if (active && nav && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: 'smooth' });
+    }
+  }, [tab]);
   
   const blankStore = {
     v1: { reqs: [], listings: [], enq: [], visits: [], saved: [], decisions: {}, contact: [], ownerDecisions: {} },
@@ -726,7 +735,7 @@ function DashboardContent() {
           {/* Top Identity Strip & Role Strip for Owner */}
           {role === 'owner' ? (
             <>
-              <div className="tsx-strip" id="tsxStrip">
+              <div className={`tsx-strip ${tab !== 'overview' ? 'off-tab' : ''}`} id="tsxStrip">
                 <div>
                   <small>Your identity</small>
                   <b>{currentUser?.sellerType || 'Owner'}</b>
@@ -751,7 +760,7 @@ function DashboardContent() {
                 </button>
               </div>
 
-              <div className="jstrip">
+              <div className={`jstrip ${tab !== 'overview' ? 'off-tab' : ''}`}>
                 <span>
                   <b>Seller / Rent Giver:</b> submit a property for admin approval, then suggest it to buyer requirements.
                 </span>
@@ -766,7 +775,7 @@ function DashboardContent() {
               </div>
             </>
           ) : role === 'buyer' ? (
-            <div className="jstrip">
+            <div className={`jstrip ${tab !== 'overview' ? 'off-tab' : ''}`}>
               <span>
                 <b>Buyer / Tenant:</b> post your requirement. It is approved automatically and shown publicly without your contact details.
               </span>
@@ -1966,7 +1975,7 @@ function DashboardContent() {
                                 </small>
                               </div>
                               <span className={`status ${isApproved ? 'st-acc' : p.status === 'rejected' ? 'st-dec' : 'st-pend'}`}>
-                                {isApproved ? 'Active listing' : p.status === 'rejected' ? 'Rejected' : 'In Review'}
+                                {isApproved ? '✓ Verified · Live' : p.status === 'rejected' ? 'Rejected' : 'Pending verification'}
                               </span>
                               <button
                                 type="button"
@@ -1984,7 +1993,7 @@ function DashboardContent() {
                     ) : (
                       <div className="li">
                         <div className="grow" style={{ color: 'var(--mut)', textAlign: 'center', padding: '36px 16px' }}>
-                          <p style={{ margin: '0 0 12px' }}>You haven't listed any properties yet.</p>
+                          <p style={{ margin: '0 0 12px' }}>You haven&apos;t listed any properties yet.</p>
                           <Link href="/list" className="btn btn-o btn-sm">
                             + List a property
                           </Link>
@@ -2558,7 +2567,7 @@ function DashboardContent() {
                     <b>🔒 Lead privacy rule</b>
                     <ul>
                       <li>
-                        <b>30 days on your dashboard:</b> a buyer's or tenant's name and number are shown here for 30 days from the request date. After that they are removed from your dashboard automatically; the lead, the property and the status stay.
+                        <b>30 days on your dashboard:</b> a buyer&apos;s or tenant&apos;s name and number are shown here for 30 days from the request date. After that they are removed from your dashboard automatically; the lead, the property and the status stay.
                       </li>
                       <li>
                         <b>Admin records are permanent:</b> TrueSpace admin keeps the full lead record, including contact details and consent, for safety and dispute checks. The 30-day rule does not affect it.
@@ -2828,7 +2837,7 @@ function DashboardContent() {
                   <h4>
                     <span>Property verification badges <small className="hs" style={{ color: 'var(--mut)', fontWeight: 400 }}>optional</small></span>
                   </h4>
-                  <p style={{ color: 'var(--mut)', fontSize: '13.5px', margin: '6px 0 16px' }}>
+                  <p style={{ color: 'var(--mut)', fontSize: '13.5px', margin: '6px 0 16px', padding: '0 16px' }}>
                     All verification is optional. Approved badges show on your property; with none, it shows “Unverified”. Prototype: no payment is taken and no file is stored.
                   </p>
 
@@ -2853,7 +2862,7 @@ function DashboardContent() {
                                 TSP-{pid} · {prop?.title || 'Dhaka Property'}
                               </Link>
                               <small style={{ display: 'block', color: 'var(--mut)' }}>
-                                📍 {locTxt(prop?.area || prop?.sector || 'Dhaka')} · {money(prop?.price || 0, prop?.purpose || 'Sale')} · {prop.status === 'verified' || prop.status === 'approved' ? 'Active listing' : 'Pending'}
+                                📍 {locTxt(prop?.area || prop?.sector || 'Dhaka')} · {money(prop?.price || 0, prop?.purpose || 'Sale')} · {prop.status === 'verified' || prop.status === 'approved' ? '✓ Verified · Live' : 'Pending verification'}
                               </small>
                             </div>
                             <div>

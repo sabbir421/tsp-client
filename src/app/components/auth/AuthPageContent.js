@@ -371,11 +371,10 @@ export default function AuthPageContent({ initialTab = 'login' }) {
             <img
               src="/logo-prototype.webp"
               alt="TrueSpace Property"
+              className="auth-logo"
               style={{
                 width: '148px',
                 height: 'auto',
-                backgroundColor: 'transparent',
-                borderRadius: '0',
                 marginBottom: '26px',
                 display: 'block',
               }}
